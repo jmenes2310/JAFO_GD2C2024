@@ -110,3 +110,18 @@ INSERT INTO jafo.almacen (codigo, domicilio_codigo, costo_dia_alquiler)
 				M.ALMACEN_COSTO_DIA_AL
 	FROM gd_esquema.Maestra M
 	INNER JOIN jafo.domicilio  ON calle = M.ALMACEN_CALLE and numero_calle = M.ALMACEN_NRO_CALLE
+
+INSERT INTO jafo.marca (nombre)
+SELECT DISTINCT M.PRODUCTO_MARCA
+FROM gd_esquema.Maestra M
+WHERE M.PRODUCTO_MARCA IS NOT NULL;
+
+INSERT INTO jafo.modelo (codigo, descripcion, marca_codigo)
+SELECT DISTINCT M.PRODUCTO_MOD_CODIGO, 
+                M.PRODUCTO_MOD_DESCRIPCION, 
+                marca.codigo
+FROM gd_esquema.Maestra M
+INNER JOIN jafo.marca marca
+    ON M.PRODUCTO_MARCA = marca.nombre
+WHERE M.PRODUCTO_MOD_CODIGO IS NOT NULL
+  AND M.PRODUCTO_MOD_DESCRIPCION IS NOT NULL;

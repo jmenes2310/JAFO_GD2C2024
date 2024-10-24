@@ -25,7 +25,7 @@ BEGIN
 
 	 IF OBJECT_ID('jafo.marca', 'U') IS NOT NULL DROP TABLE jafo.marca;
 	 CREATE TABLE jafo.marca (
-		codigo DECIMAL(18,0) PRIMARY KEY,
+		codigo INT IDENTITY (1, 1) PRIMARY KEY,
 		nombre NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL
 	);
 
@@ -33,7 +33,7 @@ BEGIN
 	CREATE TABLE jafo.modelo (
 		codigo DECIMAL(18,0) PRIMARY KEY,
 		descripcion NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
-		marca_codigo DECIMAL(18,0),
+		marca_codigo INT,
 		FOREIGN KEY (marca_codigo) REFERENCES jafo.marca(codigo)
 	);
 
