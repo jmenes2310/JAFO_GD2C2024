@@ -67,7 +67,7 @@ BEGIN
 
     IF OBJECT_ID('jafo.usuario', 'U') IS NOT NULL DROP TABLE jafo.usuario;
     CREATE TABLE jafo.usuario (
-        codigo DECIMAL(18,0) PRIMARY KEY,
+        codigo INT IDENTITY PRIMARY KEY,
         nombre NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
         pass NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
         fecha_creacion DATE NOT NULL
@@ -102,7 +102,7 @@ BEGIN
 
 	IF OBJECT_ID('jafo.usuario_domicilio', 'U') IS NOT NULL DROP TABLE jafo.usuario_domicilio;
 	CREATE TABLE jafo.usuario_domicilio (
-		usuario_codigo DECIMAL(18,0),
+		usuario_codigo INT,
 		domicilio_codigo INT,
 		PRIMARY KEY (usuario_codigo, domicilio_codigo),
 		FOREIGN KEY (usuario_codigo) REFERENCES jafo.usuario(codigo),
@@ -111,8 +111,8 @@ BEGIN
 
     IF OBJECT_ID('jafo.cliente', 'U') IS NOT NULL DROP TABLE jafo.cliente;
     CREATE TABLE jafo.cliente (
-        codigo DECIMAL(18,0) PRIMARY KEY,
-        usuario_codigo DECIMAL(18,0),
+        codigo INT IDENTITY PRIMARY KEY,
+        usuario_codigo INT,
         nombre NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
         apellido NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
         fecha_nacimiento DATE NOT NULL,
@@ -123,11 +123,11 @@ BEGIN
 
     IF OBJECT_ID('jafo.vendedor', 'U') IS NOT NULL DROP TABLE jafo.vendedor;
     CREATE TABLE jafo.vendedor (
-        codigo DECIMAL(18,0) PRIMARY KEY,
+        codigo INT IDENTITY PRIMARY KEY,
         razon_social NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
         cuit NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
         mail NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
-        usuario_codigo DECIMAL(18,0),
+        usuario_codigo INT,
         FOREIGN KEY (usuario_codigo) REFERENCES jafo.usuario(codigo)
     );
 
@@ -142,7 +142,7 @@ BEGIN
     IF OBJECT_ID('jafo.publicacion', 'U') IS NOT NULL DROP TABLE jafo.publicacion;
     CREATE TABLE jafo.publicacion (
         codigo DECIMAL(18,0) IDENTITY PRIMARY KEY,
-        vendedor_codigo DECIMAL(18,0),
+        vendedor_codigo INT,
         descripcion NVARCHAR(100),
         stock DECIMAL(18,0) NOT NULL,
         producto_codigo NVARCHAR(100) NOT NULL,
@@ -160,7 +160,7 @@ BEGIN
     IF OBJECT_ID('jafo.venta', 'U') IS NOT NULL DROP TABLE jafo.venta;
     CREATE TABLE jafo.venta (
         codigo DECIMAL(18,0) IDENTITY PRIMARY KEY,
-        cliente_codigo DECIMAL(18,0),
+        cliente_codigo INT,
         fecha DATE NOT NULL,
         total DECIMAL(18,2) NOT NULL,
         FOREIGN KEY (cliente_codigo) REFERENCES jafo.cliente(codigo)
@@ -221,7 +221,7 @@ BEGIN
 		numero DECIMAL(18,0),
 		fecha DATE,
 		total DECIMAL(18,2),
-		usuario_codigo DECIMAL(18,0),
+		usuario_codigo INT,
 		PRIMARY KEY (numero),
 		FOREIGN KEY (usuario_codigo) REFERENCES jafo.usuario(codigo)
 	);
