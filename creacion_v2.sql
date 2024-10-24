@@ -292,12 +292,12 @@ FROM gd_esquema.Maestra M
 INNER JOIN jafo.provincia ON M.CLI_USUARIO_DOMICILIO_PROVINCIA = jafo.provincia.nombre
 
 INSERT INTO jafo.domicilio (calle, numero_calle, piso, depto, cp ,localidad_codigo)
-SELECT DISTINCT M.CLI_USUARIO_DOMICILIO_CALLE,
-				M.CLI_USUARIO_DOMICILIO_NRO_CALLE,
-				M.CLI_USUARIO_DOMICILIO_PISO,
-				M.CLI_USUARIO_DOMICILIO_DEPTO,
-				M.CLI_USUARIO_DOMICILIO_CP,
-				jafo.localidad.codigo
+SELECT M.CLI_USUARIO_DOMICILIO_CALLE,
+	   M.CLI_USUARIO_DOMICILIO_NRO_CALLE,
+	   M.CLI_USUARIO_DOMICILIO_PISO,
+	   M.CLI_USUARIO_DOMICILIO_DEPTO,
+	   M.CLI_USUARIO_DOMICILIO_CP,
+	   jafo.localidad.codigo
 FROM gd_esquema.Maestra M
 INNER JOIN jafo.localidad ON M.CLI_USUARIO_DOMICILIO_LOCALIDAD = jafo.localidad.nombre
 where not exists (
@@ -306,3 +306,8 @@ where not exists (
 	and numero_calle = M.CLI_USUARIO_DOMICILIO_NRO_CALLE
 	and cp = M.CLI_USUARIO_DOMICILIO_CP
 )
+
+insert into jafo.rubro (descripcion)
+    select distinct PRODUCTO_RUBRO_DESCRIPCION 
+    from gd_esquema.Maestra 
+    where PRODUCTO_RUBRO_DESCRIPCION is not null
