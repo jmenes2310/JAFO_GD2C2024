@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE CrearTablas
+create PROCEDURE jafo.CrearTablas
 AS
 BEGIN
 	-- Crear esquema
@@ -11,15 +11,15 @@ BEGIN
 
 	IF OBJECT_ID('jafo.rubro', 'U') IS NOT NULL DROP TABLE jafo.rubro;
 	CREATE TABLE jafo.rubro (
-		codigo DECIMAL(18,0) PRIMARY KEY,
+		codigo INT IDENTITY PRIMARY KEY,
 		descripcion NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL
 	);
 
 	IF OBJECT_ID('jafo.subrubro', 'U') IS NOT NULL DROP TABLE jafo.subrubro;
 	CREATE TABLE jafo.subrubro (
-		codigo DECIMAL(18,0) PRIMARY KEY,
-		nombre NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
-		rubro_codigo DECIMAL(18,0),
+		codigo INT IDENTITY PRIMARY KEY,
+		descripcion NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
+		rubro_codigo INT,
 		FOREIGN KEY (rubro_codigo) REFERENCES jafo.rubro(codigo)
 	);
 
@@ -41,13 +41,11 @@ BEGIN
 	CREATE TABLE jafo.producto (
 		codigo nvarchar(100) PRIMARY KEY,
 		descripcion NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
-		subrubro_codigo DECIMAL(18,0),
+		subrubro_codigo int,
 		modelo_codigo DECIMAL(18,0),
 		FOREIGN KEY (subrubro_codigo) REFERENCES jafo.subrubro(codigo),
 		FOREIGN KEY (modelo_codigo) REFERENCES jafo.modelo(codigo)
 	);
-
-
 
     IF OBJECT_ID('jafo.tipo_envio', 'U') IS NOT NULL DROP TABLE jafo.tipo_envio;
     CREATE TABLE jafo.tipo_envio(
@@ -77,36 +75,35 @@ BEGIN
 
     IF OBJECT_ID('jafo.provincia', 'U') IS NOT NULL DROP TABLE jafo.provincia;
     CREATE TABLE jafo.provincia (
-        codigo DECIMAL(18,0) PRIMARY KEY,
+        codigo INT IDENTITY (1, 1) PRIMARY KEY,
         nombre NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL
     );
 
     -- Crear tablas con dependencias de FK en las anteriores
     IF OBJECT_ID('jafo.localidad', 'U') IS NOT NULL DROP TABLE jafo.localidad;
     CREATE TABLE jafo.localidad (
-        codigo DECIMAL(18,0) PRIMARY KEY,
+        codigo INT IDENTITY (1, 1) PRIMARY KEY,
         nombre NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
-        cp NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
-        provincia_codigo DECIMAL(18,0),
+        provincia_codigo INT,
         FOREIGN KEY (provincia_codigo) REFERENCES jafo.provincia(codigo)
     );
 
     IF OBJECT_ID('jafo.domicilio', 'U') IS NOT NULL DROP TABLE jafo.domicilio;
     CREATE TABLE jafo.domicilio (
-        codigo DECIMAL(18,0) PRIMARY KEY,
+        codigo INT IDENTITY (1, 1) PRIMARY KEY,
         calle NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
         numero_calle DECIMAL(18,0) NOT NULL,
-        piso DECIMAL(18,0) NOT NULL,
-        depto NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
+        piso DECIMAL(18,0) ,
+        depto NVARCHAR(100) COLLATE Modern_Spanish_CI_AS ,
         cp NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
-        localidad_codigo DECIMAL(18,0),
+		localidad_codigo INT,	
         FOREIGN KEY (localidad_codigo) REFERENCES jafo.localidad(codigo)
     );
 
 	IF OBJECT_ID('jafo.usuario_domicilio', 'U') IS NOT NULL DROP TABLE jafo.usuario_domicilio;
 	CREATE TABLE jafo.usuario_domicilio (
 		usuario_codigo DECIMAL(18,0),
-		domicilio_codigo DECIMAL(18,0),
+		domicilio_codigo INT,
 		PRIMARY KEY (usuario_codigo, domicilio_codigo),
 		FOREIGN KEY (usuario_codigo) REFERENCES jafo.usuario(codigo),
 		FOREIGN KEY (domicilio_codigo) REFERENCES jafo.domicilio(codigo)
@@ -138,7 +135,7 @@ BEGIN
     CREATE TABLE jafo.almacen (
         codigo DECIMAL(18,0) PRIMARY KEY,
         costo_dia_alquiler DECIMAL(18,2),
-        domicilio_codigo DECIMAL(18,0),
+        domicilio_codigo INT,
         FOREIGN KEY (domicilio_codigo) REFERENCES jafo.domicilio(codigo)
     );
 
@@ -173,7 +170,7 @@ BEGIN
     CREATE TABLE jafo.envio (
         id INT IDENTITY PRIMARY KEY,
         venta_codigo DECIMAL(18,0),
-        domicilio_codigo DECIMAL(18,0),
+        domicilio_codigo INT,
         fecha_programada DATETIME,
         horario_inicio DECIMAL(18,0),
         hora_fin_inicio DECIMAL(18,0),
@@ -243,5 +240,3 @@ BEGIN
 	);
 
 END
-
-EXEC CrearTablas
