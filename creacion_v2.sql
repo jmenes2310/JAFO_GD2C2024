@@ -286,12 +286,23 @@ SELECT DISTINCT M.CLI_USUARIO_DOMICILIO_PROVINCIA
 FROM gd_esquema.Maestra M
 WHERE M.CLI_USUARIO_DOMICILIO_PROVINCIA IS NOT NULL
 
-INSERT INTO jafo.localidad (nombre, cp, provincia_codigo)
-SELECT DISTINCT M.CLI_USUARIO_DOMICILIO_LOCALIDAD, M.CLI_USUARIO_DOMICILIO_CP, jafo.provincia.codigo 
+INSERT INTO jafo.localidad (nombre, provincia_codigo)
+SELECT DISTINCT M.CLI_USUARIO_DOMICILIO_LOCALIDAD, jafo.provincia.codigo 
 FROM gd_esquema.Maestra M
 INNER JOIN jafo.provincia ON M.CLI_USUARIO_DOMICILIO_PROVINCIA = jafo.provincia.nombre
 
-INSERT INTO jafo.domicilio (calle, numero_calle, piso, depto, localidad_codigo)
-SELECT DISTINCT M.CLI_USUARIO_DOMICILIO_CALLE, M.CLI_USUARIO_DOMICILIO_NRO_CALLE, M.CLI_USUARIO_DOMICILIO_PISO, M.CLI_USUARIO_DOMICILIO_DEPTO, jafo.localidad.codigo
+INSERT INTO jafo.domicilio (calle, numero_calle, piso, depto, cp ,localidad_codigo)
+SELECT DISTINCT M.CLI_USUARIO_DOMICILIO_CALLE,
+				M.CLI_USUARIO_DOMICILIO_NRO_CALLE,
+				M.CLI_USUARIO_DOMICILIO_PISO,
+				M.CLI_USUARIO_DOMICILIO_DEPTO,
+				M.CLI_USUARIO_DOMICILIO_CP,
+				jafo.localidad.codigo
 FROM gd_esquema.Maestra M
 INNER JOIN jafo.localidad ON M.CLI_USUARIO_DOMICILIO_LOCALIDAD = jafo.localidad.nombre
+where not exists (
+	select 1 from jafo.domicilio
+	where calle = M.CLI_USUARIO_DOMICILIO_CALLE 
+	and numero_calle = M.CLI_USUARIO_DOMICILIO_NRO_CALLE
+	and cp = M.CLI_USUARIO_DOMICILIO_CP
+)
