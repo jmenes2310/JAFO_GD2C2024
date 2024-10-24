@@ -89,7 +89,6 @@ BEGIN
     CREATE TABLE jafo.localidad (
         codigo INT IDENTITY (1, 1) PRIMARY KEY,
         nombre NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
-        cp NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
         provincia_codigo INT,
         FOREIGN KEY (provincia_codigo) REFERENCES jafo.provincia(codigo)
     );
@@ -102,6 +101,7 @@ BEGIN
         piso DECIMAL(18,0) NOT NULL,
         depto NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
         localidad_codigo INT,
+		cp NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
         FOREIGN KEY (localidad_codigo) REFERENCES jafo.localidad(codigo)
     );
 
@@ -278,7 +278,6 @@ DROP TABLE jafo.concepto
 DROP PROCEDURE CrearTablas
 
 */
-
 
 -- Migracion
 
