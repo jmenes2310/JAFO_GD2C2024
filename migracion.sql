@@ -265,3 +265,17 @@ insert into jafo.tipo_envio(nombre)
 	select distinct envio_tipo
 	from gd_esquema.Maestra
 	where envio_tipo is not null
+
+--envio
+insert into jafo.envio(venta_codigo, domicilio_codigo, fecha_programada, horario_inicio, hora_fin_inicio, costo, fecha_entrega, tipo_envio_codigo)
+	select venta_codigo, domicilio.codigo, 
+	from gd_esquema.Maestra
+	inner join jafo.domicilio domicilio 
+		on CLI_USUARIO_DOMICILIO_CALLE = domicilio.calle
+		and CLI_USUARIO_DOMICILIO_NRO_CALLE = domicilio.numero_calle
+		and CLI_USUARIO_DOMICILIO_CP = domicilio.cp
+		and CLI_USUARIO_DOMICILIO_PISO = domicilio.piso
+		and CLI_USUARIO_DOMICILIO_DEPTO = domicilio.depto
+	inner join jafo.localidad localidad on localidad.nombre = CLI_USUARIO_DOMICILIO_LOCALIDAD
+	inner join jafo.tipo_envio te on te.nombre = ENVIO_TIPO
+
