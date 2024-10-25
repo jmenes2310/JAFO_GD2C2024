@@ -113,6 +113,7 @@ INSERT INTO jafo.domicilio (calle, numero_calle, piso, depto, cp ,localidad_codi
 	)
 
 
+
 --Almacen
 INSERT INTO jafo.almacen (codigo, domicilio_codigo, costo_dia_alquiler)
 	SELECT DISTINCT M.ALMACEN_CODIGO, 
@@ -124,84 +125,94 @@ INSERT INTO jafo.almacen (codigo, domicilio_codigo, costo_dia_alquiler)
 
 --Marca
 INSERT INTO jafo.marca (nombre)
-SELECT DISTINCT M.PRODUCTO_MARCA
-FROM gd_esquema.Maestra M
-WHERE M.PRODUCTO_MARCA IS NOT NULL;
+	SELECT DISTINCT M.PRODUCTO_MARCA
+	FROM gd_esquema.Maestra M
+	WHERE M.PRODUCTO_MARCA IS NOT NULL;
 
-INSERT INTO jafo.modelo (codigo, descripcion, marca_codigo)
-SELECT DISTINCT M.PRODUCTO_MOD_CODIGO, 
-                M.PRODUCTO_MOD_DESCRIPCION, 
-                marca.codigo
-FROM gd_esquema.Maestra M
-INNER JOIN jafo.marca marca
-    ON M.PRODUCTO_MARCA = marca.nombre
-WHERE M.PRODUCTO_MOD_CODIGO IS NOT NULL
-  AND M.PRODUCTO_MOD_DESCRIPCION IS NOT NULL;
+--Modelo
+INSERT INTO jafo.modelo (codigo, descripcion)
+	SELECT DISTINCT M.PRODUCTO_MOD_CODIGO, 
+					M.PRODUCTO_MOD_DESCRIPCION
+	FROM gd_esquema.Maestra M
+	WHERE M.PRODUCTO_MOD_CODIGO IS NOT NULL
+	  AND M.PRODUCTO_MOD_DESCRIPCION IS NOT NULL
 
-
+--Usuario
 INSERT INTO jafo.usuario (nombre, pass, fecha_creacion)
-(
-SELECT DISTINCT M.VEN_USUARIO_NOMBRE, 
-                M.VEN_USUARIO_PASS, 
-                M.VEN_USUARIO_FECHA_CREACION
-FROM gd_esquema.Maestra M
-WHERE M.VEN_USUARIO_NOMBRE IS NOT NULL
-  AND M.VEN_USUARIO_PASS IS NOT NULL
-  AND M.VEN_USUARIO_FECHA_CREACION IS NOT NULL
-)
-UNION
-(
-SELECT DISTINCT M.CLI_USUARIO_NOMBRE, 
-                M.CLI_USUARIO_PASS, 
-                M.CLI_USUARIO_FECHA_CREACION
-FROM gd_esquema.Maestra M
-WHERE M.CLI_USUARIO_NOMBRE IS NOT NULL
-  AND M.CLI_USUARIO_PASS IS NOT NULL
-  AND M.CLI_USUARIO_FECHA_CREACION IS NOT NULL
-)
+	(
+	SELECT DISTINCT M.VEN_USUARIO_NOMBRE, 
+					M.VEN_USUARIO_PASS, 
+					M.VEN_USUARIO_FECHA_CREACION
+	FROM gd_esquema.Maestra M
+	WHERE M.VEN_USUARIO_NOMBRE IS NOT NULL
+	  AND M.VEN_USUARIO_PASS IS NOT NULL
+	  AND M.VEN_USUARIO_FECHA_CREACION IS NOT NULL
+	)
+	UNION 
+	(
+	SELECT DISTINCT M.CLI_USUARIO_NOMBRE, 
+					M.CLI_USUARIO_PASS, 
+					M.CLI_USUARIO_FECHA_CREACION
+	FROM gd_esquema.Maestra M
+	WHERE M.CLI_USUARIO_NOMBRE IS NOT NULL
+	  AND M.CLI_USUARIO_PASS IS NOT NULL
+	  AND M.CLI_USUARIO_FECHA_CREACION IS NOT NULL
+	)
 
+--Cliente
 INSERT INTO jafo.cliente (usuario_codigo, nombre, apellido, fecha_nacimiento, mail, dni)
-SELECT DISTINCT U.codigo, 
-                M.CLIENTE_NOMBRE, 
-                M.CLIENTE_APELLIDO, 
-                M.CLIENTE_FECHA_NAC, 
-                M.CLIENTE_MAIL, 
-                M.CLIENTE_DNI
-FROM gd_esquema.Maestra M
-INNER JOIN jafo.usuario U
-    ON M.CLI_USUARIO_NOMBRE = U.nombre
-    AND M.CLI_USUARIO_PASS = U.pass
-    AND M.CLI_USUARIO_FECHA_CREACION = U.fecha_creacion
-WHERE M.CLIENTE_NOMBRE IS NOT NULL
-  AND M.CLIENTE_APELLIDO IS NOT NULL
-  AND M.CLIENTE_FECHA_NAC IS NOT NULL
-  AND M.CLIENTE_MAIL IS NOT NULL
-  AND M.CLIENTE_DNI IS NOT NULL
+	SELECT DISTINCT U.codigo, 
+					M.CLIENTE_NOMBRE, 
+					M.CLIENTE_APELLIDO, 
+					M.CLIENTE_FECHA_NAC, 
+					M.CLIENTE_MAIL, 
+					M.CLIENTE_DNI
+	FROM gd_esquema.Maestra M
+	INNER JOIN jafo.usuario U
+		ON M.CLI_USUARIO_NOMBRE = U.nombre
+		AND M.CLI_USUARIO_PASS = U.pass
+		AND M.CLI_USUARIO_FECHA_CREACION = U.fecha_creacion
+	WHERE M.CLIENTE_NOMBRE IS NOT NULL
+	  AND M.CLIENTE_APELLIDO IS NOT NULL
+	  AND M.CLIENTE_FECHA_NAC IS NOT NULL
+	  AND M.CLIENTE_MAIL IS NOT NULL
+	  AND M.CLIENTE_DNI IS NOT NULL
 
+--Vendedor
 INSERT INTO jafo.vendedor (usuario_codigo, razon_social, cuit, mail)
-SELECT DISTINCT U.codigo, 
-                M.VENDEDOR_RAZON_SOCIAL, 
-                M.VENDEDOR_CUIT, 
-                M.VENDEDOR_MAIL
-FROM gd_esquema.Maestra M
-INNER JOIN jafo.usuario U
-    ON M.VEN_USUARIO_NOMBRE = U.nombre
-    AND M.VEN_USUARIO_PASS = U.pass
-    AND M.VEN_USUARIO_FECHA_CREACION = U.fecha_creacion
-WHERE M.VENDEDOR_RAZON_SOCIAL IS NOT NULL
-  AND M.VENDEDOR_CUIT IS NOT NULL
-  AND M.VENDEDOR_MAIL IS NOT NULL
+	SELECT DISTINCT U.codigo, 
+					M.VENDEDOR_RAZON_SOCIAL, 
+					M.VENDEDOR_CUIT, 
+					M.VENDEDOR_MAIL
+	FROM gd_esquema.Maestra M
+	INNER JOIN jafo.usuario U
+		ON M.VEN_USUARIO_NOMBRE = U.nombre
+		AND M.VEN_USUARIO_PASS = U.pass
+		AND M.VEN_USUARIO_FECHA_CREACION = U.fecha_creacion
+	WHERE M.VENDEDOR_RAZON_SOCIAL IS NOT NULL
+	  AND M.VENDEDOR_CUIT IS NOT NULL
+	  AND M.VENDEDOR_MAIL IS NOT NULL
+
+--Usuario_domicilio
+CREATE INDEX idx_domicilio ON jafo.domicilio (calle, numero_calle, cp) --para mejorar performance
 
 INSERT INTO jafo.usuario_domicilio (usuario_codigo, domicilio_codigo)
-SELECT u.codigo AS usuario_codigo, d.codigo AS domicilio_codigo
-FROM gd_esquema.Maestra M
-INNER JOIN jafo.usuario u
-    ON (u.nombre = M.VEN_USUARIO_NOMBRE OR u.nombre = M.CLI_USUARIO_NOMBRE)
-INNER JOIN jafo.domicilio d
-    ON (d.calle = M.VEN_USUARIO_DOMICILIO_CALLE AND d.numero_calle = M.VEN_USUARIO_DOMICILIO_NRO_CALLE AND d.cp = M.VEN_USUARIO_DOMICILIO_CP)
-   OR (d.calle = M.CLI_USUARIO_DOMICILIO_CALLE AND d.numero_calle = M.CLI_USUARIO_DOMICILIO_NRO_CALLE AND d.cp = M.CLI_USUARIO_DOMICILIO_CP)
-WHERE NOT EXISTS (
-    SELECT 1 
-    FROM jafo.usuario_domicilio ud
-    WHERE ud.usuario_codigo = u.codigo AND ud.domicilio_codigo = d.codigo
-)
+	(
+	SELECT distinct u.codigo AS usuario_codigo, d.codigo AS domicilio_codigo
+	FROM gd_esquema.Maestra M
+	INNER JOIN jafo.usuario u
+			ON (u.nombre = M.VEN_USUARIO_NOMBRE and u.pass = M.VEN_USUARIO_PASS and u.fecha_creacion = VEN_USUARIO_FECHA_CREACION)
+	left JOIN jafo.domicilio d
+			ON (d.calle = M.VEN_USUARIO_DOMICILIO_CALLE AND d.numero_calle = M.VEN_USUARIO_DOMICILIO_NRO_CALLE AND d.cp = M.VEN_USUARIO_DOMICILIO_CP )
+
+	union
+
+	SELECT distinct u.codigo AS usuario_codigo, d.codigo AS domicilio_codigo
+	FROM gd_esquema.Maestra M
+	INNER JOIN jafo.usuario u
+			ON (u.nombre = M.CLI_USUARIO_NOMBRE and u.pass = M.CLI_USUARIO_PASS and u.fecha_creacion = CLI_USUARIO_FECHA_CREACION)
+	left JOIN jafo.domicilio d
+			ON (d.calle = M.CLI_USUARIO_DOMICILIO_CALLE AND d.numero_calle = M.CLI_USUARIO_DOMICILIO_NRO_CALLE AND d.cp = M.CLI_USUARIO_DOMICILIO_CP )
+	
+	)
+

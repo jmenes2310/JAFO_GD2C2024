@@ -37,8 +37,6 @@ BEGIN
 	CREATE TABLE jafo.modelo (
 		codigo DECIMAL(18,0) PRIMARY KEY,
 		descripcion NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
-		marca_codigo INT,
-		FOREIGN KEY (marca_codigo) REFERENCES jafo.marca(codigo)
 	);
 
 	IF OBJECT_ID('jafo.producto', 'U') IS NOT NULL DROP TABLE jafo.producto;
@@ -47,8 +45,10 @@ BEGIN
 		descripcion NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
 		subrubro_codigo int,
 		modelo_codigo DECIMAL(18,0),
+		marca_codigo INT,
 		FOREIGN KEY (subrubro_codigo) REFERENCES jafo.subrubro(codigo),
-		FOREIGN KEY (modelo_codigo) REFERENCES jafo.modelo(codigo)
+		FOREIGN KEY (modelo_codigo) REFERENCES jafo.modelo(codigo),
+		FOREIGN KEY (marca_codigo) REFERENCES jafo.marca(codigo)
 	);
 
     IF OBJECT_ID('jafo.tipo_envio', 'U') IS NOT NULL DROP TABLE jafo.tipo_envio;
