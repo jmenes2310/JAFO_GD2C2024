@@ -6,7 +6,7 @@ as
 begin
 	begin try
 	begin transaction
-		insert into jafo.rubro (codigo)
+		insert into jafo.rubro (descripcion)
 			select distinct PRODUCTO_RUBRO_DESCRIPCION 
 			from gd_esquema.Maestra 
 			where PRODUCTO_RUBRO_DESCRIPCION is not null
@@ -29,12 +29,14 @@ insert into jafo.subrubro (descripcion, rubro_codigo)
 	LEFT JOIN jafo.rubro on PRODUCTO_RUBRO_DESCRIPCION = jafo.rubro.descripcion
 	where PRODUCTO_SUB_RUBRO is not null
 
+--Provincia
 
 INSERT INTO jafo.provincia (nombre)
 SELECT DISTINCT M.CLI_USUARIO_DOMICILIO_PROVINCIA
 FROM gd_esquema.Maestra M
 WHERE M.CLI_USUARIO_DOMICILIO_PROVINCIA IS NOT NULL
 
+--Localidad
 INSERT INTO jafo.localidad (nombre, provincia_codigo)
 	(
 		SELECT DISTINCT M.CLI_USUARIO_DOMICILIO_LOCALIDAD, jafo.provincia.codigo 
@@ -54,10 +56,10 @@ INSERT INTO jafo.localidad (nombre, provincia_codigo)
 		INNER JOIN jafo.provincia ON M.ALMACEN_PROVINCIA = jafo.provincia.nombre
 	)
 
-
+--Domicilio
 INSERT INTO jafo.domicilio (calle, numero_calle, piso, depto, cp ,localidad_codigo)
 	(
-		SELECT M.CLI_USUARIO_DOMICILIO_CALLE,
+		SELECT DISTINCT M.CLI_USUARIO_DOMICILIO_CALLE,
 			   M.CLI_USUARIO_DOMICILIO_NRO_CALLE,
 			   M.CLI_USUARIO_DOMICILIO_PISO,
 			   M.CLI_USUARIO_DOMICILIO_DEPTO,
@@ -65,15 +67,20 @@ INSERT INTO jafo.domicilio (calle, numero_calle, piso, depto, cp ,localidad_codi
 			   jafo.localidad.codigo
 		FROM gd_esquema.Maestra M
 		INNER JOIN jafo.localidad ON M.CLI_USUARIO_DOMICILIO_LOCALIDAD = jafo.localidad.nombre
-		where not exists (
-			select 1 from jafo.domicilio
-			where calle = M.CLI_USUARIO_DOMICILIO_CALLE 
-			and numero_calle = M.CLI_USUARIO_DOMICILIO_NRO_CALLE
-			and cp = M.CLI_USUARIO_DOMICILIO_CP
-		)
+		--where not exists (
+		--	select 1 from jafo.domicilio
+		--	where calle = M.CLI_USUARIO_DOMICILIO_CALLE 
+		--	and numero_calle = M.CLI_USUARIO_DOMICILIO_NRO_CALLE
+		--	and cp = M.CLI_USUARIO_DOMICILIO_CP
+		--)
+		--hacer esto esta mal porque estas filtrando por las que no están en jafo.domicilio
+		-- ¿de que nos sirve eso? Haciendo eso podriamos tenes dos registros identicos
+		-- usando distinct o agrupando por todas las columnas nos aseguramos de solo traer direcciones unicas sin repetidos
+		-- ese where serviria en caso de que estemos haciendo una migracion y ya tengamos datos en nuestro jafo.domicilio
+
 	UNION
 
-	SELECT M.VEN_USUARIO_DOMICILIO_CALLE,
+	SELECT DISTINCT M.VEN_USUARIO_DOMICILIO_CALLE,
 		   M.VEN_USUARIO_DOMICILIO_NRO_CALLE,
 		   M.VEN_USUARIO_DOMICILIO_PISO,
 		   M.VEN_USUARIO_DOMICILIO_DEPTO,
@@ -81,15 +88,16 @@ INSERT INTO jafo.domicilio (calle, numero_calle, piso, depto, cp ,localidad_codi
 		   jafo.localidad.codigo
 	FROM gd_esquema.Maestra M
 	INNER JOIN jafo.localidad ON M.VEN_USUARIO_DOMICILIO_LOCALIDAD = jafo.localidad.nombre
-	where not exists (
-		select 1 from jafo.domicilio
-		where calle = M.VEN_USUARIO_DOMICILIO_CALLE 
-		and numero_calle = M.VEN_USUARIO_DOMICILIO_NRO_CALLE
-		and cp = M.VEN_USUARIO_DOMICILIO_CP
-		)
+	--where not exists (
+	--	select 1 from jafo.domicilio
+	--	where calle = M.VEN_USUARIO_DOMICILIO_CALLE 
+	--	and numero_calle = M.VEN_USUARIO_DOMICILIO_NRO_CALLE
+	--	and cp = M.VEN_USUARIO_DOMICILIO_CP
+	--	)
+
 	UNION 
 
-	SELECT M.ALMACEN_CALLE,
+	SELECT DISTINCT M.ALMACEN_CALLE,
 		   M.ALMACEN_NRO_CALLE,
 		   null,
 		   null,
@@ -97,20 +105,24 @@ INSERT INTO jafo.domicilio (calle, numero_calle, piso, depto, cp ,localidad_codi
 		   jafo.localidad.codigo
 	FROM gd_esquema.Maestra M
 	INNER JOIN jafo.localidad ON M.ALMACEN_Localidad = jafo.localidad.nombre
-	where not exists (
-		select 1 from jafo.domicilio
-		where calle = M.ALMACEN_CALLE 
-		and numero_calle = M.ALMACEN_NRO_CALLE
-		)
+	--where not exists (
+	--	select 1 from jafo.domicilio
+	--	where calle = M.ALMACEN_CALLE 
+	--	and numero_calle = M.ALMACEN_NRO_CALLE
+	--	)
 	)
 
+
+--Almacen
 INSERT INTO jafo.almacen (codigo, domicilio_codigo, costo_dia_alquiler)
 	SELECT DISTINCT M.ALMACEN_CODIGO, 
-			    jafo.domicilio.codigo,
+			    jafo.domicilio.codigo domicilio_codigo,
 				M.ALMACEN_COSTO_DIA_AL
 	FROM gd_esquema.Maestra M
 	INNER JOIN jafo.domicilio  ON calle = M.ALMACEN_CALLE and numero_calle = M.ALMACEN_NRO_CALLE
 
+
+--Marca
 INSERT INTO jafo.marca (nombre)
 SELECT DISTINCT M.PRODUCTO_MARCA
 FROM gd_esquema.Maestra M

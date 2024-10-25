@@ -1,4 +1,8 @@
-create PROCEDURE jafo.CrearTablas
+IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[CrearTablas]') AND type = N'P')
+	DROP PROCEDURE jafo.CrearTablas
+go
+
+CREATE PROCEDURE jafo.CrearTablas
 AS
 BEGIN
 	-- Crear esquema
@@ -95,7 +99,7 @@ BEGIN
         numero_calle DECIMAL(18,0) NOT NULL,
         piso DECIMAL(18,0) ,
         depto NVARCHAR(100) COLLATE Modern_Spanish_CI_AS ,
-        cp NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
+        cp NVARCHAR(100) COLLATE Modern_Spanish_CI_AS ,
 		localidad_codigo INT,	
         FOREIGN KEY (localidad_codigo) REFERENCES jafo.localidad(codigo)
     );
@@ -133,9 +137,10 @@ BEGIN
 
     IF OBJECT_ID('jafo.almacen', 'U') IS NOT NULL DROP TABLE jafo.almacen;
     CREATE TABLE jafo.almacen (
-        codigo DECIMAL(18,0) PRIMARY KEY,
-        costo_dia_alquiler DECIMAL(18,2),
+        codigo DECIMAL(18,0),
         domicilio_codigo INT,
+		 costo_dia_alquiler DECIMAL(18,2),
+		PRIMARY KEY (codigo, domicilio_codigo),
         FOREIGN KEY (domicilio_codigo) REFERENCES jafo.domicilio(codigo)
     );
 
@@ -152,8 +157,9 @@ BEGIN
         costo DECIMAL(18,2),
         porcentaje_venta DECIMAL(18,2),
         almacen_codigo DECIMAL(18,0),
+		almacen_domicilio_codigo INT
         FOREIGN KEY (vendedor_codigo) REFERENCES jafo.vendedor(codigo),
-        FOREIGN KEY (almacen_codigo) REFERENCES jafo.almacen(codigo),
+        FOREIGN KEY (almacen_codigo, almacen_domicilio_codigo) REFERENCES jafo.almacen(codigo, domicilio_codigo),
 		FOREIGN KEY (producto_codigo) REFERENCES jafo.producto(codigo)
     );
 
