@@ -216,3 +216,52 @@ INSERT INTO jafo.usuario_domicilio (usuario_codigo, domicilio_codigo)
 	
 	)
 
+--Producto
+
+INSERT INTO jafo.producto (codigo, descripcion, subrubro_codigo, modelo_codigo, marca_codigo)
+	select distinct
+		PRODUCTO_CODIGO
+		,PRODUCTO_DESCRIPCION 
+		,subrubro.codigo subrubro_codigo
+		,modelo.codigo modelo_codigo
+		,marca.codigo marca_codigo
+	from gd_esquema.Maestra
+	inner join jafo.subrubro subrubro on PRODUCTO_SUB_RUBRO = subrubro.descripcion
+	inner join jafo.modelo modelo on PRODUCTO_MOD_CODIGO = modelo.codigo
+	inner join jafo.marca marca on PRODUCTO_MARCA = marca.nombre
+
+--tipo_medio_pago 
+INSERT INTO jafo.tipo_medio_pago(nombre)
+	SELECT	DISTINCT pago_tipo_medio_pago 
+	from gd_esquema.Maestra
+	where PAGO_TIPO_MEDIO_PAGO is not null
+
+--medio_pago
+insert into jafo.medio_pago(nombre, tipo_medio_pago_codigo)
+	select distinct PAGO_MEDIO_PAGO, tmp.codigo
+	from gd_esquema.Maestra
+	inner join jafo.tipo_medio_pago tmp on PAGO_TIPO_MEDIO_PAGO = tmp.nombre
+
+--venta
+insert into jafo.venta (codigo, cliente_codigo, fecha, total)
+	select distinct VENTA_CODIGO, c.codigo, VENTA_FECHA, VENTA_TOTAL
+	from gd_esquema.Maestra
+	inner join jafo.cliente c 
+		on c.nombre = CLIENTE_NOMBRE 
+		and c.apellido =  CLIENTE_APELLIDO
+		and c.fecha_nacimiento = CLIENTE_FECHA_NAC
+		and c.mail = CLIENTE_MAIL
+		and c.dni = CLIENTE_DNI
+
+--pago
+insert into jafo.pago (venta_codigo, importe, fecha, medio_pago_codigo, numero_tarjeta, fecha_vencimiento_tarjeta, cantidad_cuotas)
+	select distinct venta.codigo, PAGO_IMPORTE, PAGO_FECHA, medio_pago.codigo, PAGO_NRO_TARJETA, PAGO_FECHA_VENC_TARJETA, PAGO_CANT_CUOTAS
+	from gd_esquema.Maestra
+	inner join jafo.venta venta on venta.codigo = VENTA_CODIGO
+	inner join jafo.medio_pago medio_pago on medio_pago.nombre = PAGO_MEDIO_PAGO
+
+--tipo envio
+insert into jafo.tipo_envio(nombre)
+	select distinct envio_tipo
+	from gd_esquema.Maestra
+	where envio_tipo is not null

@@ -41,7 +41,8 @@ BEGIN
 
 	IF OBJECT_ID('jafo.producto', 'U') IS NOT NULL DROP TABLE jafo.producto;
 	CREATE TABLE jafo.producto (
-		codigo nvarchar(100) PRIMARY KEY,
+		id INT IDENTITY(1,1) PRIMARY KEY,
+		codigo nvarchar(100),
 		descripcion NVARCHAR(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
 		subrubro_codigo int,
 		modelo_codigo DECIMAL(18,0),
@@ -53,8 +54,8 @@ BEGIN
 
     IF OBJECT_ID('jafo.tipo_envio', 'U') IS NOT NULL DROP TABLE jafo.tipo_envio;
     CREATE TABLE jafo.tipo_envio(
-        codigo DECIMAL(18,0) IDENTITY PRIMARY KEY,
-        nombre VARCHAR(255) NOT NULL
+        codigo INT IDENTITY PRIMARY KEY,
+        nombre NVARCHAR(100) NOT NULL
     );
 
     IF OBJECT_ID('jafo.tipo_medio_pago', 'U') IS NOT NULL DROP TABLE jafo.tipo_medio_pago;
@@ -150,7 +151,7 @@ BEGIN
         vendedor_codigo INT,
         descripcion NVARCHAR(100),
         stock DECIMAL(18,0) NOT NULL,
-        producto_codigo NVARCHAR(100) NOT NULL,
+        producto_id INT NOT NULL,
         fecha_inicio DATE NOT NULL,
         fecha_fin DATE NOT NULL,
         precio DECIMAL(18,2) NOT NULL,
@@ -160,12 +161,12 @@ BEGIN
 		almacen_domicilio_codigo INT
         FOREIGN KEY (vendedor_codigo) REFERENCES jafo.vendedor(codigo),
         FOREIGN KEY (almacen_codigo, almacen_domicilio_codigo) REFERENCES jafo.almacen(codigo, domicilio_codigo),
-		FOREIGN KEY (producto_codigo) REFERENCES jafo.producto(codigo)
+		FOREIGN KEY (producto_id) REFERENCES jafo.producto(id)
     );
 
     IF OBJECT_ID('jafo.venta', 'U') IS NOT NULL DROP TABLE jafo.venta;
     CREATE TABLE jafo.venta (
-        codigo DECIMAL(18,0) IDENTITY PRIMARY KEY,
+        codigo DECIMAL(18,0) PRIMARY KEY,
         cliente_codigo INT,
         fecha DATE NOT NULL,
         total DECIMAL(18,2) NOT NULL,
@@ -182,7 +183,7 @@ BEGIN
         hora_fin_inicio DECIMAL(18,0),
         costo DECIMAL(18,2),
         fecha_entrega DATETIME,
-        tipo_envio_codigo DECIMAL(18,0),
+        tipo_envio_codigo INT,
         FOREIGN KEY (venta_codigo) REFERENCES jafo.venta(codigo),
         FOREIGN KEY (domicilio_codigo) REFERENCES jafo.domicilio(codigo),
         FOREIGN KEY (tipo_envio_codigo) REFERENCES jafo.tipo_envio(codigo)
@@ -198,7 +199,7 @@ BEGIN
 
     IF OBJECT_ID('jafo.pago', 'U') IS NOT NULL DROP TABLE jafo.pago;
     CREATE TABLE jafo.pago (
-        codigo DECIMAL(18,0) IDENTITY PRIMARY KEY,
+        codigo INT IDENTITY PRIMARY KEY,
         venta_codigo DECIMAL(18,0) NOT NULL,
         importe DECIMAL(18,2) NOT NULL,
         fecha DATE NOT NULL,
