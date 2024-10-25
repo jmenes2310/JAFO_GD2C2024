@@ -268,7 +268,7 @@ insert into jafo.tipo_envio(nombre)
 
 --envio
 insert into jafo.envio(venta_codigo, domicilio_codigo, fecha_programada, horario_inicio, hora_fin_inicio, costo, fecha_entrega, tipo_envio_codigo)
-	select venta_codigo, domicilio.codigo, 
+	select venta_codigo, domicilio.codigo, ENVIO_FECHA_PROGAMADA, ENVIO_HORA_INICIO, ENVIO_HORA_FIN_INICIO, ENVIO_COSTO, ENVIO_FECHA_ENTREGA, tipo_envio.codigo
 	from gd_esquema.Maestra
 	inner join jafo.domicilio domicilio 
 		on CLI_USUARIO_DOMICILIO_CALLE = domicilio.calle
