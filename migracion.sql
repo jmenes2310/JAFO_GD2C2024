@@ -21,6 +21,11 @@ begin
 	end catch
 end
 
+-- Rubro
+insert into jafo.rubro (descripcion)
+			select distinct PRODUCTO_RUBRO_DESCRIPCION 
+			from gd_esquema.Maestra 
+			where PRODUCTO_RUBRO_DESCRIPCION is not null
 
 --Subrubro 
 insert into jafo.subrubro (descripcion, rubro_codigo)
@@ -352,6 +357,11 @@ from gd_esquema.Maestra
 where FACTURA_DET_TIPO is not null
 
 --Detalle Factura
-
+insert into jafo.detalle_factura (concepto_codigo, publicacion_codigo, factura_numero, cantidad, subtotal)
+select conc.codigo, PUBLICACION_CODIGO, FACTURA_NUMERO, FACTURA_DET_CANTIDAD, FACTURA_DET_SUBTOTAL
+from gd_esquema.Maestra
+inner join jafo.concepto conc
+	on FACTURA_DET_TIPO = conc.nombre
+where FACTURA_NUMERO is not null and PUBLICACION_CODIGO is not null
 
 exec jafo.reiniciar
