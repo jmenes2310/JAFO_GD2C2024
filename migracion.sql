@@ -284,8 +284,10 @@ insert into jafo.envio(venta_codigo, domicilio_codigo, fecha_programada, horario
 		and CLI_USUARIO_DOMICILIO_DEPTO = domicilio.depto
 		and domicilio.localidad_codigo = localidad.codigo
 
+CREATE INDEX idx_maestra_vendedor_cuit ON gd_esquema.Maestra(VENDEDOR_CUIT, VENDEDOR_MAIL, VENDEDOR_RAZON_SOCIAL);
+CREATE INDEX idx_maestra_almacen ON gd_esquema.Maestra(ALMACEN_PROVINCIA, ALMACEN_Localidad, ALMACEN_CALLE, ALMACEN_NRO_CALLE, ALMACEN_CODIGO);
+CREATE INDEX idx_maestra_producto ON gd_esquema.Maestra(PRODUCTO_MOD_CODIGO, PRODUCTO_MOD_DESCRIPCION, PRODUCTO_MARCA, PRODUCTO_RUBRO_DESCRIPCION, PRODUCTO_SUB_RUBRO, PRODUCTO_DESCRIPCION);
 
-begin tran
 insert into jafo.publicacion(codigo,vendedor_codigo, descripcion, stock, producto_id, fecha_inicio, fecha_fin, precio, costo, porcentaje_venta, almacen_codigo, almacen_domicilio_codigo)
 select PUBLICACION_CODIGO, ven.codigo, PUBLICACION_DESCRIPCION, PUBLICACION_STOCK, prod.id, PUBLICACION_FECHA, PUBLICACION_FECHA_V, PUBLICACION_PRECIO, PUBLICACION_COSTO, PUBLICACION_PORC_VENTA ,alm.codigo, alm.domicilio_codigo
 from gd_esquema.Maestra
@@ -321,6 +323,11 @@ inner join jafo.producto prod
 	and prod.modelo_codigo = modelo.codigo
 	and prod.subrubro_codigo = subr.codigo
 where PUBLICACION_CODIGO is not null and VEN_USUARIO_NOMBRE is not null
-rollback tran
+
+DROP INDEX idx_maestra_vendedor_cuit ON gd_esquema.Maestra;
+DROP INDEX idx_maestra_almacen ON gd_esquema.Maestra;
+DROP INDEX idx_maestra_producto ON gd_esquema.Maestra;
+
+
 
 exec jafo.reiniciar
