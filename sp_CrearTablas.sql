@@ -147,7 +147,7 @@ BEGIN
 
     IF OBJECT_ID('jafo.publicacion', 'U') IS NOT NULL DROP TABLE jafo.publicacion;
     CREATE TABLE jafo.publicacion (
-        codigo DECIMAL(18,0) IDENTITY PRIMARY KEY,
+        codigo DECIMAL(18,0) PRIMARY KEY,
         vendedor_codigo INT,
         descripcion NVARCHAR(100),
         stock DECIMAL(18,0) NOT NULL,
@@ -188,7 +188,7 @@ BEGIN
         FOREIGN KEY (domicilio_codigo) REFERENCES jafo.domicilio(codigo),
         FOREIGN KEY (tipo_envio_codigo) REFERENCES jafo.tipo_envio(codigo)
     );
-
+	
     IF OBJECT_ID('jafo.medio_pago', 'U') IS NOT NULL DROP TABLE jafo.medio_pago;
     CREATE TABLE jafo.medio_pago (
         codigo DECIMAL(18,0) IDENTITY PRIMARY KEY,

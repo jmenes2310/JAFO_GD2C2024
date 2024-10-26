@@ -268,14 +268,59 @@ insert into jafo.tipo_envio(nombre)
 
 --envio
 insert into jafo.envio(venta_codigo, domicilio_codigo, fecha_programada, horario_inicio, hora_fin_inicio, costo, fecha_entrega, tipo_envio_codigo)
-	select venta_codigo, domicilio.codigo, ENVIO_FECHA_PROGAMADA, ENVIO_HORA_INICIO, ENVIO_HORA_FIN_INICIO, ENVIO_COSTO, ENVIO_FECHA_ENTREGA, tipo_envio.codigo
+	select distinct venta_codigo, domicilio.codigo, ENVIO_FECHA_PROGAMADA, ENVIO_HORA_INICIO, ENVIO_HORA_FIN_INICIO, ENVIO_COSTO, ENVIO_FECHA_ENTREGA, te.codigo
 	from gd_esquema.Maestra
+	inner join jafo.provincia prov 
+		on prov.nombre = CLI_USUARIO_DOMICILIO_PROVINCIA
+	inner join jafo.localidad localidad 
+		on localidad.nombre = CLI_USUARIO_DOMICILIO_LOCALIDAD
+		and localidad.provincia_codigo = prov.codigo
+	inner join jafo.tipo_envio te on te.nombre = ENVIO_TIPO
 	inner join jafo.domicilio domicilio 
 		on CLI_USUARIO_DOMICILIO_CALLE = domicilio.calle
 		and CLI_USUARIO_DOMICILIO_NRO_CALLE = domicilio.numero_calle
 		and CLI_USUARIO_DOMICILIO_CP = domicilio.cp
 		and CLI_USUARIO_DOMICILIO_PISO = domicilio.piso
 		and CLI_USUARIO_DOMICILIO_DEPTO = domicilio.depto
-	inner join jafo.localidad localidad on localidad.nombre = CLI_USUARIO_DOMICILIO_LOCALIDAD
-	inner join jafo.tipo_envio te on te.nombre = ENVIO_TIPO
+		and domicilio.localidad_codigo = localidad.codigo
 
+
+begin tran
+insert into jafo.publicacion(codigo,vendedor_codigo, descripcion, stock, producto_id, fecha_inicio, fecha_fin, precio, costo, porcentaje_venta, almacen_codigo, almacen_domicilio_codigo)
+select PUBLICACION_CODIGO, ven.codigo, PUBLICACION_DESCRIPCION, PUBLICACION_STOCK, prod.id, PUBLICACION_FECHA, PUBLICACION_FECHA_V, PUBLICACION_PRECIO, PUBLICACION_COSTO, PUBLICACION_PORC_VENTA ,alm.codigo, alm.domicilio_codigo
+from gd_esquema.Maestra
+inner join jafo.vendedor ven
+	on VENDEDOR_CUIT = ven.cuit
+	and VENDEDOR_MAIL = ven.mail
+	and VENDEDOR_RAZON_SOCIAL = ven.razon_social
+inner join jafo.provincia prov
+	on ALMACEN_PROVINCIA = prov.nombre
+inner join jafo.localidad localidad
+		on ALMACEN_Localidad = localidad.nombre
+		and localidad.provincia_codigo = prov.codigo
+inner join jafo.domicilio dom
+	on dom.calle = ALMACEN_CALLE
+	and dom.numero_calle = ALMACEN_NRO_CALLE
+	and dom.localidad_codigo = localidad.codigo
+inner join jafo.almacen alm
+	on alm.codigo = ALMACEN_CODIGO
+	and alm.domicilio_codigo = dom.codigo
+inner join jafo.modelo modelo
+		on PRODUCTO_MOD_CODIGO = modelo.codigo
+		and PRODUCTO_MOD_DESCRIPCION = modelo.descripcion
+inner join jafo.marca marca
+	on PRODUCTO_MARCA = marca.nombre
+inner join jafo.rubro rubro
+	on rubro.descripcion = PRODUCTO_RUBRO_DESCRIPCION
+inner join jafo.subrubro subr
+	on subr.descripcion = PRODUCTO_SUB_RUBRO
+	and subr.rubro_codigo = rubro.codigo
+inner join jafo.producto prod
+	on PRODUCTO_DESCRIPCION = prod.descripcion
+	and prod.marca_codigo = marca.codigo
+	and prod.modelo_codigo = modelo.codigo
+	and prod.subrubro_codigo = subr.codigo
+where PUBLICACION_CODIGO is not null and VEN_USUARIO_NOMBRE is not null
+rollback tran
+
+exec jafo.reiniciar
