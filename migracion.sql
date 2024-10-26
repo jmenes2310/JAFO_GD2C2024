@@ -345,5 +345,13 @@ inner join jafo.vendedor ven
 	on ven.codigo = publi.vendedor_codigo
 where FACTURA_NUMERO is not null and PUBLICACION_CODIGO is not null
 
+--Concepto
+insert into jafo.concepto (nombre)
+select distinct FACTURA_DET_TIPO
+from gd_esquema.Maestra
+where FACTURA_DET_TIPO is not null
+
+--Detalle Factura
+
 
 exec jafo.reiniciar

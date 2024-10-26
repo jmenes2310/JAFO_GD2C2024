@@ -66,7 +66,7 @@ BEGIN
 
     IF OBJECT_ID('jafo.concepto', 'U') IS NOT NULL DROP TABLE jafo.concepto;
     CREATE TABLE jafo.concepto(
-        codigo DECIMAL(18,0) IDENTITY PRIMARY KEY,
+        codigo INT IDENTITY PRIMARY KEY,
         nombre NVARCHAR(100) NOT NULL
     );
 
@@ -235,15 +235,15 @@ BEGIN
 
     IF OBJECT_ID('jafo.detalle_factura', 'U') IS NOT NULL DROP TABLE jafo.detalle_factura;
     CREATE TABLE jafo.detalle_factura (
-        tipo NVARCHAR(100),
         publicacion_codigo DECIMAL(18,0),
         factura_numero decimal(18,0),
-        concepto_codigo DECIMAL(18,0) NOT NULL,
+        concepto_codigo INT NOT NULL,
         cantidad DECIMAL(18,0) NOT NULL,
         subtotal DECIMAL(18,2),
-        PRIMARY KEY (tipo, publicacion_codigo, factura_numero),
+        PRIMARY KEY (concepto_codigo, publicacion_codigo, factura_numero),
 		FOREIGN KEY (publicacion_codigo) REFERENCES jafo.publicacion(codigo),
-		FOREIGN KEY (factura_numero) REFERENCES jafo.factura(numero)
+		FOREIGN KEY (factura_numero) REFERENCES jafo.factura(numero),
+		FOREIGN KEY (concepto_codigo) REFERENCES jafo.concepto(codigo)
 	);
 
 END
