@@ -284,6 +284,7 @@ insert into jafo.envio(venta_codigo, domicilio_codigo, fecha_programada, horario
 		and CLI_USUARIO_DOMICILIO_DEPTO = domicilio.depto
 		and domicilio.localidad_codigo = localidad.codigo
 
+-- Publicacion
 CREATE INDEX idx_maestra_vendedor_cuit ON gd_esquema.Maestra(VENDEDOR_CUIT, VENDEDOR_MAIL, VENDEDOR_RAZON_SOCIAL);
 CREATE INDEX idx_maestra_almacen ON gd_esquema.Maestra(ALMACEN_PROVINCIA, ALMACEN_Localidad, ALMACEN_CALLE, ALMACEN_NRO_CALLE, ALMACEN_CODIGO);
 CREATE INDEX idx_maestra_producto ON gd_esquema.Maestra(PRODUCTO_MOD_CODIGO, PRODUCTO_MOD_DESCRIPCION, PRODUCTO_MARCA, PRODUCTO_RUBRO_DESCRIPCION, PRODUCTO_SUB_RUBRO, PRODUCTO_DESCRIPCION);
@@ -328,6 +329,21 @@ DROP INDEX idx_maestra_vendedor_cuit ON gd_esquema.Maestra;
 DROP INDEX idx_maestra_almacen ON gd_esquema.Maestra;
 DROP INDEX idx_maestra_producto ON gd_esquema.Maestra;
 
+-- detalle_venta
+insert into jafo.detalle_venta(venta_codigo, publicacion_codigo, cantidad, subtotal, precio)
+select VENTA_CODIGO,PUBLICACION_CODIGO,VENTA_DET_CANT, VENTA_DET_PRECIO, VENTA_DET_SUB_TOTAL
+from gd_esquema.Maestra
+where PUBLICACION_CODIGO is not null and VENTA_CODIGO is not null
+
+-- Factura
+insert into jafo.factura(numero, usuario_codigo, fecha, total)
+select distinct FACTURA_NUMERO, ven.usuario_codigo, FACTURA_FECHA, FACTURA_TOTAL
+from gd_esquema.Maestra
+inner join jafo.publicacion publi
+	on publi.codigo = PUBLICACION_CODIGO
+inner join jafo.vendedor ven
+	on ven.codigo = publi.vendedor_codigo
+where FACTURA_NUMERO is not null and PUBLICACION_CODIGO is not null
 
 
 exec jafo.reiniciar
