@@ -1055,5 +1055,5 @@ begin
 end
 go
 
-exec jafo.borrarTablas
+--exec jafo.borrarTablas
 exec jafo.migracion
