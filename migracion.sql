@@ -1,41 +1,39 @@
-﻿IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[CrearTablas]') AND type = N'P')
-	DROP PROCEDURE jafo.CrearTablas
-go
+﻿--DURACION APROXIMADA DE MIGRACION COMPLETA: 3:20 (tres minutos y veinte segundos)
 
-IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[borrarTablas]') AND type = N'P')
-	DROP PROCEDURE jafo.borrarTablas
-go
-
-IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[migracionDatos]') AND type = N'P')
-	drop procedure jafo.migracion_rubro
-	drop procedure jafo.migracion_subrubro
-	drop procedure jafo.migracion_provincia
-	drop procedure jafo.migracion_localidad
-	drop procedure jafo.migracion_domicilio
-	drop procedure jafo.migracion_almacen
-	drop procedure jafo.migracion_marca
-	drop procedure jafo.migracion_modelo
-	drop procedure jafo.migracion_usuario
-	drop procedure jafo.migracion_cliente
-	drop procedure jafo.migracion_vendedor
-	drop procedure jafo.migracion_usuario_domicilio
-	drop procedure jafo.migracion_producto
-	drop procedure jafo.migracion_tipo_medio_pago
-	drop procedure jafo.migracion_medio_pago
-	drop procedure jafo.migracion_venta
-	drop procedure jafo.migracion_pago
-	drop procedure jafo.migracion_tipo_envio
-	drop procedure jafo.migracion_envio
-	drop procedure jafo.migracion_publicacion
-	drop procedure jafo.migracion_detalle_venta
-	drop procedure jafo.migracion_factura
-	drop procedure jafo.migracion_concepto
-	drop procedure jafo.migracion_detalle_factura
-	drop procedure jafo.migracionDatos
-go
+--	drop procedure jafo.migracion_rubro
+--	drop procedure jafo.migracion_subrubro
+--	drop procedure jafo.migracion_provincia
+--	drop procedure jafo.migracion_localidad
+--	drop procedure jafo.migracion_domicilio
+--	drop procedure jafo.migracion_almacen
+--	drop procedure jafo.migracion_marca
+--	drop procedure jafo.migracion_modelo
+--	drop procedure jafo.migracion_usuario
+--	drop procedure jafo.migracion_cliente
+--	drop procedure jafo.migracion_vendedor
+--	drop procedure jafo.migracion_usuario_domicilio
+--	drop procedure jafo.migracion_producto
+--	drop procedure jafo.migracion_tipo_medio_pago
+--	drop procedure jafo.migracion_medio_pago
+--	drop procedure jafo.migracion_venta
+--	drop procedure jafo.migracion_pago
+--	drop procedure jafo.migracion_tipo_envio
+--	drop procedure jafo.migracion_envio
+--	drop procedure jafo.migracion_publicacion
+--	drop procedure jafo.migracion_detalle_venta
+--	drop procedure jafo.migracion_factura
+--	drop procedure jafo.migracion_concepto
+--	drop procedure jafo.migracion_detalle_factura
+--	drop procedure jafo.migracionDatos
+--go
 
 IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[migracion]') AND type = N'P')
 	DROP PROCEDURE jafo.migracion
+go
+
+
+IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[CrearTablas]') AND type = N'P')
+	DROP PROCEDURE jafo.CrearTablas
 go
 
 CREATE PROCEDURE jafo.CrearTablas
@@ -47,7 +45,6 @@ BEGIN
         EXEC('CREATE SCHEMA jafo');
     END
 
-    -- Crear tablas independientes (sin FK)
 
 	IF OBJECT_ID('jafo.rubro', 'U') IS NOT NULL DROP TABLE jafo.rubro;
 	CREATE TABLE jafo.rubro (
@@ -400,16 +397,6 @@ begin
 					   jafo.localidad.codigo
 				FROM gd_esquema.Maestra M
 				INNER JOIN jafo.localidad ON M.CLI_USUARIO_DOMICILIO_LOCALIDAD = jafo.localidad.nombre
-				--where not exists (
-				--	select 1 from jafo.domicilio
-				--	where calle = M.CLI_USUARIO_DOMICILIO_CALLE 
-				--	and numero_calle = M.CLI_USUARIO_DOMICILIO_NRO_CALLE
-				--	and cp = M.CLI_USUARIO_DOMICILIO_CP
-				--)
-				--hacer esto esta mal porque estas filtrando por las que no están en jafo.domicilio
-				-- ¿de que nos sirve eso? Haciendo eso podriamos tenes dos registros identicos
-				-- usando distinct o agrupando por todas las columnas nos aseguramos de solo traer direcciones unicas sin repetidos
-				-- ese where serviria en caso de que estemos haciendo una migracion y ya tengamos datos en nuestro jafo.domicilio
 
 			UNION
 
@@ -421,12 +408,6 @@ begin
 				   jafo.localidad.codigo
 			FROM gd_esquema.Maestra M
 			INNER JOIN jafo.localidad ON M.VEN_USUARIO_DOMICILIO_LOCALIDAD = jafo.localidad.nombre
-			--where not exists (
-			--	select 1 from jafo.domicilio
-			--	where calle = M.VEN_USUARIO_DOMICILIO_CALLE 
-			--	and numero_calle = M.VEN_USUARIO_DOMICILIO_NRO_CALLE
-			--	and cp = M.VEN_USUARIO_DOMICILIO_CP
-			--	)
 
 			UNION 
 
@@ -438,11 +419,6 @@ begin
 				   jafo.localidad.codigo
 			FROM gd_esquema.Maestra M
 			INNER JOIN jafo.localidad ON M.ALMACEN_Localidad = jafo.localidad.nombre
-			--where not exists (
-			--	select 1 from jafo.domicilio
-			--	where calle = M.ALMACEN_CALLE 
-			--	and numero_calle = M.ALMACEN_NRO_CALLE
-			--	)
 			)
 		commit transaction
 	end try
@@ -650,7 +626,6 @@ begin
 					ON (d.calle = M.CLI_USUARIO_DOMICILIO_CALLE AND d.numero_calle = M.CLI_USUARIO_DOMICILIO_NRO_CALLE AND d.cp = M.CLI_USUARIO_DOMICILIO_CP )
 	
 			)
-		drop index idx_domicilio on jafo.domicilio
 
 		commit transaction
 	end try
@@ -841,50 +816,46 @@ as
 begin
 	begin try
 	begin transaction
-		CREATE INDEX idx_maestra_vendedor_cuit ON gd_esquema.Maestra(VENDEDOR_CUIT, VENDEDOR_MAIL, VENDEDOR_RAZON_SOCIAL);
-		CREATE INDEX idx_maestra_almacen ON gd_esquema.Maestra(ALMACEN_PROVINCIA, ALMACEN_Localidad, ALMACEN_CALLE, ALMACEN_NRO_CALLE, ALMACEN_CODIGO);
-		CREATE INDEX idx_maestra_producto ON gd_esquema.Maestra(PRODUCTO_MOD_CODIGO, PRODUCTO_MOD_DESCRIPCION, PRODUCTO_MARCA, PRODUCTO_RUBRO_DESCRIPCION, PRODUCTO_SUB_RUBRO, PRODUCTO_DESCRIPCION);
+
+		CREATE INDEX IX_Producto_Marca_Modelo_Subrubro ON jafo.producto (marca_codigo, modelo_codigo, subrubro_codigo) --para mejorar performance
 
 		insert into jafo.publicacion(codigo,vendedor_codigo, descripcion, stock, producto_id, fecha_inicio, fecha_fin, precio, costo, porcentaje_venta, almacen_codigo, almacen_domicilio_codigo)
 		select PUBLICACION_CODIGO, ven.codigo, PUBLICACION_DESCRIPCION, PUBLICACION_STOCK, prod.id, PUBLICACION_FECHA, PUBLICACION_FECHA_V, PUBLICACION_PRECIO, PUBLICACION_COSTO, PUBLICACION_PORC_VENTA ,alm.codigo, alm.domicilio_codigo
-		from gd_esquema.Maestra
+		from (select * from gd_esquema.Maestra where PUBLICACION_CODIGO is not null and VEN_USUARIO_NOMBRE is not null) as maestra
 		inner join jafo.vendedor ven
-			on VENDEDOR_CUIT = ven.cuit
-			and VENDEDOR_MAIL = ven.mail
-			and VENDEDOR_RAZON_SOCIAL = ven.razon_social
+			on maestra.VENDEDOR_CUIT = ven.cuit
+			and maestra.VENDEDOR_MAIL = ven.mail
+			and maestra.VENDEDOR_RAZON_SOCIAL = ven.razon_social
 		inner join jafo.provincia prov
-			on ALMACEN_PROVINCIA = prov.nombre
+			on maestra.ALMACEN_PROVINCIA = prov.nombre
 		inner join jafo.localidad localidad
-				on ALMACEN_Localidad = localidad.nombre
+				on maestra.ALMACEN_Localidad = localidad.nombre
 				and localidad.provincia_codigo = prov.codigo
 		inner join jafo.domicilio dom
-			on dom.calle = ALMACEN_CALLE
-			and dom.numero_calle = ALMACEN_NRO_CALLE
+			on dom.calle = maestra.ALMACEN_CALLE
+			and dom.numero_calle = maestra.ALMACEN_NRO_CALLE
 			and dom.localidad_codigo = localidad.codigo
 		inner join jafo.almacen alm
-			on alm.codigo = ALMACEN_CODIGO
+			on alm.codigo = maestra.ALMACEN_CODIGO
 			and alm.domicilio_codigo = dom.codigo
 		inner join jafo.modelo modelo
-				on PRODUCTO_MOD_CODIGO = modelo.codigo
-				and PRODUCTO_MOD_DESCRIPCION = modelo.descripcion
+				on maestra.PRODUCTO_MOD_CODIGO = modelo.codigo
+				and maestra.PRODUCTO_MOD_DESCRIPCION = modelo.descripcion
 		inner join jafo.marca marca
-			on PRODUCTO_MARCA = marca.nombre
+			on maestra.PRODUCTO_MARCA = marca.nombre
 		inner join jafo.rubro rubro
-			on rubro.descripcion = PRODUCTO_RUBRO_DESCRIPCION
+			on rubro.descripcion = maestra.PRODUCTO_RUBRO_DESCRIPCION
 		inner join jafo.subrubro subr
-			on subr.descripcion = PRODUCTO_SUB_RUBRO
+			on subr.descripcion = maestra.PRODUCTO_SUB_RUBRO
 			and subr.rubro_codigo = rubro.codigo
 		inner join jafo.producto prod
-			on PRODUCTO_DESCRIPCION = prod.descripcion
+			on maestra.PRODUCTO_DESCRIPCION = prod.descripcion
 			and prod.marca_codigo = marca.codigo
 			and prod.modelo_codigo = modelo.codigo
 			and prod.subrubro_codigo = subr.codigo
-		where PUBLICACION_CODIGO is not null and VEN_USUARIO_NOMBRE is not null
 
-		DROP INDEX idx_maestra_vendedor_cuit ON gd_esquema.Maestra;
-		DROP INDEX idx_maestra_almacen ON gd_esquema.Maestra;
-		DROP INDEX idx_maestra_producto ON gd_esquema.Maestra;
 		commit transaction
+
 	end try
 
 	begin catch
@@ -985,36 +956,52 @@ begin
 end
 go
 
+
+IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[migracionDatos]') AND type = N'P')
+	DROP PROCEDURE jafo.migracionDatos
+go
 create procedure jafo.migracionDatos
 as
 begin 
-	exec jafo.migracion_rubro
-	exec jafo.migracion_subrubro
-	exec jafo.migracion_provincia
-	exec jafo.migracion_localidad
-	exec jafo.migracion_domicilio
-	exec jafo.migracion_almacen
-	exec jafo.migracion_marca
-	exec jafo.migracion_modelo
-	exec jafo.migracion_usuario
-	exec jafo.migracion_cliente
-	exec jafo.migracion_vendedor
-	exec jafo.migracion_usuario_domicilio
-	exec jafo.migracion_producto
-	exec jafo.migracion_tipo_medio_pago
-	exec jafo.migracion_medio_pago
-	exec jafo.migracion_venta
-	exec jafo.migracion_pago
-	exec jafo.migracion_tipo_envio
-	exec jafo.migracion_envio
-	exec jafo.migracion_publicacion
-	exec jafo.migracion_detalle_venta
-	exec jafo.migracion_factura
-	exec jafo.migracion_concepto
-	exec jafo.migracion_detalle_factura
+	begin try
+		exec jafo.migracion_rubro
+		exec jafo.migracion_subrubro
+		exec jafo.migracion_provincia
+		exec jafo.migracion_localidad
+		exec jafo.migracion_domicilio
+		exec jafo.migracion_almacen
+		exec jafo.migracion_marca
+		exec jafo.migracion_modelo
+		exec jafo.migracion_usuario
+		exec jafo.migracion_cliente
+		exec jafo.migracion_vendedor
+		exec jafo.migracion_usuario_domicilio
+		exec jafo.migracion_producto
+		exec jafo.migracion_tipo_medio_pago
+		exec jafo.migracion_medio_pago
+		exec jafo.migracion_venta
+		exec jafo.migracion_pago
+		exec jafo.migracion_tipo_envio
+		exec jafo.migracion_envio
+		exec jafo.migracion_publicacion
+		exec jafo.migracion_detalle_venta
+		exec jafo.migracion_factura
+		exec jafo.migracion_concepto
+		exec jafo.migracion_detalle_factura
+	
+	end try
+
+	begin catch
+		declare @error varchar(max) = ERROR_MESSAGE()
+		RAISERROR(@error,16,1)
+	end catch
 end
 go
 
+--migracion
+IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[migracion]') AND type = N'P')
+	DROP PROCEDURE jafo.migracion
+go
 create procedure jafo.migracion
 as 
 begin
@@ -1023,6 +1010,10 @@ begin
 end
 go
 
+--borrarTablas
+IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[borrarTablas]') AND type = N'P')
+	DROP PROCEDURE jafo.borrarTablas
+go
 
 create procedure jafo.borrarTablas
 as 
@@ -1057,3 +1048,4 @@ go
 
 --exec jafo.borrarTablas
 exec jafo.migracion
+
