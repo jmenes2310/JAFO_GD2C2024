@@ -959,74 +959,74 @@ exec jafo.migracion_detalle_factura
 go
 
 --borrarTablas
-IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[borrarTablas]') AND type = N'P')
-	DROP PROCEDURE jafo.borrarTablas
-go
+--IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[borrarTablas]') AND type = N'P')
+--	DROP PROCEDURE jafo.borrarTablas
+--go
 
-create procedure jafo.borrarTablas
-as 
-begin
-	DROP TABLE jafo.usuario_domicilio
-	DROP TABLE jafo.detalle_factura
-	DROP TABLE jafo.detalle_venta
-	DROP TABLE jafo.publicacion
-	DROP TABLE jafo.producto
-	DROP TABLE jafo.pago
-	DROP TABLE jafo.medio_pago
-	DROP TABLE jafo.modelo
-	DROP TABLE jafo.marca
-	DROP TABLE jafo.almacen
-	DROP TABLE jafo.envio
-	DROP TABLE jafo.domicilio
-	DROP TABLE jafo.localidad
-	DROP TABLE jafo.provincia
-	DROP TABLE jafo.venta
-	DROP TABLE jafo.cliente
-	DROP TABLE jafo.factura
-	DROP TABLE jafo.subrubro
-	DROP TABLE jafo.rubro
-	DROP TABLE jafo.tipo_envio
-	DROP TABLE jafo.tipo_medio_pago
-	DROP TABLE jafo.vendedor
-	DROP TABLE jafo.usuario
-	DROP TABLE jafo.concepto
+--create procedure jafo.borrarTablas
+--as 
+--begin
+--	DROP TABLE jafo.usuario_domicilio
+--	DROP TABLE jafo.detalle_factura
+--	DROP TABLE jafo.detalle_venta
+--	DROP TABLE jafo.publicacion
+--	DROP TABLE jafo.producto
+--	DROP TABLE jafo.pago
+--	DROP TABLE jafo.medio_pago
+--	DROP TABLE jafo.modelo
+--	DROP TABLE jafo.marca
+--	DROP TABLE jafo.almacen
+--	DROP TABLE jafo.envio
+--	DROP TABLE jafo.domicilio
+--	DROP TABLE jafo.localidad
+--	DROP TABLE jafo.provincia
+--	DROP TABLE jafo.venta
+--	DROP TABLE jafo.cliente
+--	DROP TABLE jafo.factura
+--	DROP TABLE jafo.subrubro
+--	DROP TABLE jafo.rubro
+--	DROP TABLE jafo.tipo_envio
+--	DROP TABLE jafo.tipo_medio_pago
+--	DROP TABLE jafo.vendedor
+--	DROP TABLE jafo.usuario
+--	DROP TABLE jafo.concepto
 
-end
+--end
 
---borrar sps
-IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[borrarSps]') AND type = N'P')
-	DROP PROCEDURE jafo.borrarSps
-go
+----borrar sps
+--IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[borrarSps]') AND type = N'P')
+--	DROP PROCEDURE jafo.borrarSps
+--go
 
-create procedure jafo.borrarSps
-as 
-begin
-	drop procedure jafo.migracion_rubro
-	drop procedure jafo.migracion_subrubro
-	drop procedure jafo.migracion_provincia
-	drop procedure jafo.migracion_localidad
-	drop procedure jafo.migracion_domicilio
-	drop procedure jafo.migracion_almacen
-	drop procedure jafo.migracion_marca
-	drop procedure jafo.migracion_modelo
-	drop procedure jafo.migracion_usuario
-	drop procedure jafo.migracion_cliente
-	drop procedure jafo.migracion_vendedor
-	drop procedure jafo.migracion_usuario_domicilio
-	drop procedure jafo.migracion_producto
-	drop procedure jafo.migracion_tipo_medio_pago
-	drop procedure jafo.migracion_medio_pago
-	drop procedure jafo.migracion_venta
-	drop procedure jafo.migracion_pago
-	drop procedure jafo.migracion_tipo_envio
-	drop procedure jafo.migracion_envio
-	drop procedure jafo.migracion_publicacion
-	drop procedure jafo.migracion_detalle_venta
-	drop procedure jafo.migracion_factura
-	drop procedure jafo.migracion_concepto
-	drop procedure jafo.migracion_detalle_factura
+--create procedure jafo.borrarSps
+--as 
+--begin
+--	drop procedure jafo.migracion_rubro
+--	drop procedure jafo.migracion_subrubro
+--	drop procedure jafo.migracion_provincia
+--	drop procedure jafo.migracion_localidad
+--	drop procedure jafo.migracion_domicilio
+--	drop procedure jafo.migracion_almacen
+--	drop procedure jafo.migracion_marca
+--	drop procedure jafo.migracion_modelo
+--	drop procedure jafo.migracion_usuario
+--	drop procedure jafo.migracion_cliente
+--	drop procedure jafo.migracion_vendedor
+--	drop procedure jafo.migracion_usuario_domicilio
+--	drop procedure jafo.migracion_producto
+--	drop procedure jafo.migracion_tipo_medio_pago
+--	drop procedure jafo.migracion_medio_pago
+--	drop procedure jafo.migracion_venta
+--	drop procedure jafo.migracion_pago
+--	drop procedure jafo.migracion_tipo_envio
+--	drop procedure jafo.migracion_envio
+--	drop procedure jafo.migracion_publicacion
+--	drop procedure jafo.migracion_detalle_venta
+--	drop procedure jafo.migracion_factura
+--	drop procedure jafo.migracion_concepto
+--	drop procedure jafo.migracion_detalle_factura
 
-end
+--end
 
 --exec jafo.borrarTablas
 --exec jafo.borrarSps
