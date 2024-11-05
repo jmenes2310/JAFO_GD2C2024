@@ -1,35 +1,10 @@
 ﻿--DURACION APROXIMADA DE MIGRACION COMPLETA: 3:20 (tres minutos y veinte segundos)
 
---	drop procedure jafo.migracion_rubro
---	drop procedure jafo.migracion_subrubro
---	drop procedure jafo.migracion_provincia
---	drop procedure jafo.migracion_localidad
---	drop procedure jafo.migracion_domicilio
---	drop procedure jafo.migracion_almacen
---	drop procedure jafo.migracion_marca
---	drop procedure jafo.migracion_modelo
---	drop procedure jafo.migracion_usuario
---	drop procedure jafo.migracion_cliente
---	drop procedure jafo.migracion_vendedor
---	drop procedure jafo.migracion_usuario_domicilio
---	drop procedure jafo.migracion_producto
---	drop procedure jafo.migracion_tipo_medio_pago
---	drop procedure jafo.migracion_medio_pago
---	drop procedure jafo.migracion_venta
---	drop procedure jafo.migracion_pago
---	drop procedure jafo.migracion_tipo_envio
---	drop procedure jafo.migracion_envio
---	drop procedure jafo.migracion_publicacion
---	drop procedure jafo.migracion_detalle_venta
---	drop procedure jafo.migracion_factura
---	drop procedure jafo.migracion_concepto
---	drop procedure jafo.migracion_detalle_factura
---	drop procedure jafo.migracionDatos
---go
-
-IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[migracion]') AND type = N'P')
-	DROP PROCEDURE jafo.migracion
-go
+-- Crear esquema
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'jafo')
+	BEGIN
+        EXEC('CREATE SCHEMA jafo');
+	END
 
 
 IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[CrearTablas]') AND type = N'P')
@@ -39,12 +14,6 @@ go
 CREATE PROCEDURE jafo.CrearTablas
 AS
 BEGIN
-	-- Crear esquema
-    IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'jafo')
-    BEGIN
-        EXEC('CREATE SCHEMA jafo');
-    END
-
 
 	IF OBJECT_ID('jafo.rubro', 'U') IS NOT NULL DROP TABLE jafo.rubro;
 	CREATE TABLE jafo.rubro (
@@ -957,57 +926,36 @@ end
 go
 
 
-IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[migracionDatos]') AND type = N'P')
-	DROP PROCEDURE jafo.migracionDatos
-go
-create procedure jafo.migracionDatos
-as
-begin 
-	begin try
-		exec jafo.migracion_rubro
-		exec jafo.migracion_subrubro
-		exec jafo.migracion_provincia
-		exec jafo.migracion_localidad
-		exec jafo.migracion_domicilio
-		exec jafo.migracion_almacen
-		exec jafo.migracion_marca
-		exec jafo.migracion_modelo
-		exec jafo.migracion_usuario
-		exec jafo.migracion_cliente
-		exec jafo.migracion_vendedor
-		exec jafo.migracion_usuario_domicilio
-		exec jafo.migracion_producto
-		exec jafo.migracion_tipo_medio_pago
-		exec jafo.migracion_medio_pago
-		exec jafo.migracion_venta
-		exec jafo.migracion_pago
-		exec jafo.migracion_tipo_envio
-		exec jafo.migracion_envio
-		exec jafo.migracion_publicacion
-		exec jafo.migracion_detalle_venta
-		exec jafo.migracion_factura
-		exec jafo.migracion_concepto
-		exec jafo.migracion_detalle_factura
-	
-	end try
 
-	begin catch
-		declare @error varchar(max) = ERROR_MESSAGE()
-		RAISERROR(@error,16,1)
-	end catch
-end
-go
+--creacion de tablas
+exec jafo.CrearTablas
 
 --migracion
-IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[migracion]') AND type = N'P')
-	DROP PROCEDURE jafo.migracion
-go
-create procedure jafo.migracion
-as 
-begin
-	exec jafo.CrearTablas
-	exec jafo.migracionDatos
-end
+exec jafo.migracion_rubro
+exec jafo.migracion_subrubro
+exec jafo.migracion_provincia
+exec jafo.migracion_localidad
+exec jafo.migracion_domicilio
+exec jafo.migracion_almacen
+exec jafo.migracion_marca
+exec jafo.migracion_modelo
+exec jafo.migracion_usuario
+exec jafo.migracion_cliente
+exec jafo.migracion_vendedor
+exec jafo.migracion_usuario_domicilio
+exec jafo.migracion_producto
+exec jafo.migracion_tipo_medio_pago
+exec jafo.migracion_medio_pago
+exec jafo.migracion_venta
+exec jafo.migracion_pago
+exec jafo.migracion_tipo_envio
+exec jafo.migracion_envio
+exec jafo.migracion_publicacion
+exec jafo.migracion_detalle_venta
+exec jafo.migracion_factura
+exec jafo.migracion_concepto
+exec jafo.migracion_detalle_factura
+
 go
 
 --borrarTablas
@@ -1044,8 +992,41 @@ begin
 	DROP TABLE jafo.concepto
 
 end
+
+--borrar sps
+IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[jafo].[borrarSps]') AND type = N'P')
+	DROP PROCEDURE jafo.borrarSps
 go
 
---exec jafo.borrarTablas
-exec jafo.migracion
+create procedure jafo.borrarSps
+as 
+begin
+	drop procedure jafo.migracion_rubro
+	drop procedure jafo.migracion_subrubro
+	drop procedure jafo.migracion_provincia
+	drop procedure jafo.migracion_localidad
+	drop procedure jafo.migracion_domicilio
+	drop procedure jafo.migracion_almacen
+	drop procedure jafo.migracion_marca
+	drop procedure jafo.migracion_modelo
+	drop procedure jafo.migracion_usuario
+	drop procedure jafo.migracion_cliente
+	drop procedure jafo.migracion_vendedor
+	drop procedure jafo.migracion_usuario_domicilio
+	drop procedure jafo.migracion_producto
+	drop procedure jafo.migracion_tipo_medio_pago
+	drop procedure jafo.migracion_medio_pago
+	drop procedure jafo.migracion_venta
+	drop procedure jafo.migracion_pago
+	drop procedure jafo.migracion_tipo_envio
+	drop procedure jafo.migracion_envio
+	drop procedure jafo.migracion_publicacion
+	drop procedure jafo.migracion_detalle_venta
+	drop procedure jafo.migracion_factura
+	drop procedure jafo.migracion_concepto
+	drop procedure jafo.migracion_detalle_factura
 
+end
+
+--exec jafo.borrarTablas
+--exec jafo.borrarSps
