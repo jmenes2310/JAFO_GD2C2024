@@ -1028,5 +1028,12 @@ go
 
 --end
 
+--drop procedure jafo.CrearTablas
 --exec jafo.borrarTablas
 --exec jafo.borrarSps
+
+--drop procedure jafo.borrarTablas
+--drop procedure jafo.borrarSps
+
+--drop schema jafo
+
