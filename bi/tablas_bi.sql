@@ -40,3 +40,40 @@ create table jafo.bi_hecho_publicacion(
 	,FOREIGN KEY (marca_id) REFERENCES jafo.bi_dim_marca
 	,FOREIGN KEY (tiempo_id) REFERENCES jafo.bi_dim_tiempo
 )
+
+-- Tabla ubicacion
+create table jafo.bi_dim_ubicacion (
+	idUbicacion int identity (1,1) primary key,
+	provincia nvarchar(100),
+	localidad nvarchar(100)
+)
+go
+
+-- tabla de almacen
+create table jafo.bi_dim_almacen (
+	idAlmacen int primary key,
+	ubicacion_id int,
+	FOREIGN KEY (ubicacion_id) REFERENCES jafo.bi_dim_ubicacion(idUbicacion)
+)
+go
+
+-- tabla rubro
+create table jafo.bi_dim_rubro (
+	idRubro int primary key,
+	rubro nvarchar(100)
+)
+go
+
+-- tabla rango etario
+create table jafo.bi_dim_rango_etario (
+    idRangoEtario INT IDENTITY(1,1) PRIMARY KEY,
+    descripcion_rango VARCHAR(20)
+)
+go
+
+-- Tabla rango horario
+create table jafo.bi_dim_rango_horario(
+	idRangoHorario int identity (1,1) primary key,
+	descripcion_rango nvarchar(100)
+)
+go

@@ -42,3 +42,48 @@ begin
     return @stock_vendido + @stock_actual
 end
 go
+
+-- Recibe una edad int y devuelve el id del rango de esa edad
+create function jafo.getAgeRange(@age int)
+returns int
+as
+begin
+	declare @id int
+	if (@age < 24)
+		set @id = (select idRangoEtario
+		from jafo.bi_dim_rango_etario
+		where descripcion_rango = ('< 25'))
+	else if (@age < 35)
+		set @id = (select idRangoEtario
+		from jafo.bi_dim_rango_etario
+		where descripcion_rango = ('25-35'))
+	else if (@age < 50)
+		set @id = (select idRangoEtario
+		from jafo.bi_dim_rango_etario
+		where descripcion_rango = ('35-50'))
+	else
+		set @id = (select idRangoEtario
+		from jafo.bi_dim_rango_etario
+		where descripcion_rango = ('> 50'))
+	return @id
+end
+go
+
+
+-- Recibe una fecha datetime y devuelve el id del rango horario asociado
+create function jafo.getRangoHorarioPorFecha(@fechaHora datetime)
+returns int
+as
+begin
+	declare @id int
+	if(DATEPART(HOUR,@fechaHora) between 0 and 5) 
+		set @id = (select idRangoHorario from jafo.bi_dim_rango_horario where descripcion_rango = ('00:00-06:00'))
+	else if(DATEPART(HOUR,@fechaHora) between 6 and 11) 
+		set @id = (select idRangoHorario from jafo.bi_dim_rango_horario where descripcion_rango = ('06:00-12:00'))
+	else if(DATEPART(HOUR,@fechaHora) between 12 and 17) 
+		set @id = (select idRangoHorario from jafo.bi_dim_rango_horario where descripcion_rango = ('12:00-18:00'))
+	else 
+		set @id = (select idRangoHorario from jafo.bi_dim_rango_horario where descripcion_rango = ('18:00-24:00'))
+	return @id
+end
+go

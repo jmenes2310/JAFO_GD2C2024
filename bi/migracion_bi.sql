@@ -137,6 +137,7 @@ begin try
 end
 go
 
+--producto
 create procedure jafo.migracion_bi_dim_producto
 as 
 begin 
@@ -159,6 +160,7 @@ end
 
 go 
 
+-- hechos publicacion
 create procedure jafo.migracion_bi_hecho_publicacion
 as 
 begin
@@ -184,8 +186,61 @@ begin
 end
 go
 
+create procedure jafo.migracion_dim_ubicacion
+as
+begin
+	insert into jafo.bi_dim_ubicacion (provincia, localidad)
+	select distinct pr.nombre, loc.nombre
+	from jafo.domicilio dom
+	inner join localidad loc
+		on loc.codigo = dom.localidad_codigo
+	inner join provincia pr
+		on pr.codigo = loc.provincia_codigo
+end
+go
 
+create procedure jafo.migracion_dim_almacen 
+as
+begin tran
+	insert into jafo.bi_dim_almacen
+	select alm.codigo, ubi.idUbicacion
+	from jafo.almacen alm
+	inner join jafo.domicilio dom
+		on dom.codigo = alm.domicilio_codigo
+	inner join jafo.localidad loc
+		on dom.localidad_codigo = loc.codigo
+	inner join jafo.provincia prov
+		on loc.provincia_codigo = prov.codigo
+	inner join jafo.bi_dim_ubicacion ubi
+		on ubi.localidad = loc.nombre
+		and ubi.provincia = prov.nombre
+commit
+go
 
+create procedure jafo.migracion_dim_rubro
+as
+begin tran
+	insert into jafo.bi_dim_rubro
+	select rb.codigo, rb.descripcion
+	from jafo.rubro rb
+commit
+go
+
+create procedure jafo.migracion_bi_dim_rango_etario 
+as
+begin
+	insert into jafo.bi_dim_rango_etario (descripcion_rango)
+	values ('< 25'), ('25-35'), ('35-50'), ('> 50');
+end
+go
+
+create procedure jafo.migracion_dim_rango_horario
+as
+begin
+	insert into jafo.bi_dim_rango_horario 
+	values ('00:00-06:00'), ('06:00-12:00'), ('12:00-18:00'), ('18:00-24:00');
+end
+go
 
 -----------------EJECUCIONES--------------------------------------------------------
 EXEC JAFO.migracion_bi_dim_tiempo
@@ -193,8 +248,10 @@ EXEC jafo.migracion_bi_dim_subrubro
 exec jafo.migracion_bi_dim_marca
 exec jafo.migracion_bi_dim_producto
 exec jafo.migracion_bi_hecho_publicacion
-
-
+exec jafo.migracion_dim_ubicacion
+exec jafo.migracion_dim_almacen
+exec jafo.migracion_dim_rubro
+exec jafo.migracion_bi_dim_rango_etario 
 
 --borrar tablas
 truncate table jafo.bi_hecho_publicacion
