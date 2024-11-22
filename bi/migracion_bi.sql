@@ -144,9 +144,10 @@ begin
 	begin try
 	begin transaction
 		insert into jafo.bi_dim_producto
-			select p.id, p.subrubro_codigo, p.marca_codigo
+			select p.id, p.subrubro_codigo, p.marca_codigo, sr.rubro_codigo
 			from jafo.producto p
-
+			inner join jafo.subrubro sr
+				on sr.codigo = p.subrubro_codigo
 		commit transaction
 	end try
 	begin catch
@@ -188,7 +189,7 @@ go
 
 create procedure jafo.migracion_dim_ubicacion
 as
-begin
+begin transaction
 	insert into jafo.bi_dim_ubicacion (provincia, localidad)
 	select distinct pr.nombre, loc.nombre
 	from jafo.domicilio dom
@@ -196,7 +197,7 @@ begin
 		on loc.codigo = dom.localidad_codigo
 	inner join provincia pr
 		on pr.codigo = loc.provincia_codigo
-end
+commit
 go
 
 create procedure jafo.migracion_dim_almacen 
@@ -228,19 +229,73 @@ go
 
 create procedure jafo.migracion_bi_dim_rango_etario 
 as
-begin
+begin transaction
 	insert into jafo.bi_dim_rango_etario (descripcion_rango)
 	values ('< 25'), ('25-35'), ('35-50'), ('> 50');
-end
+commit
 go
 
 create procedure jafo.migracion_dim_rango_horario
 as
-begin
+begin transaction
 	insert into jafo.bi_dim_rango_horario 
 	values ('00:00-06:00'), ('06:00-12:00'), ('12:00-18:00'), ('18:00-24:00');
-end
+commit
 go
+
+create procedure jafo.migracion_dim_cliente
+as
+begin transaction
+	insert into jafo.bi_dim_cliente
+	select c.codigo,
+		   DATEDIFF(year, getdate(), c.fecha_nacimiento)
+	from cliente c
+commit
+go
+
+create procedure jafo.migracion_dim_cliente_ubicacion
+as
+begin transaction 
+	insert into jafo.bi_dim_cliente_ubicacion
+	select c.codigo, ubi.idUbicacion from jafo.cliente c
+	inner join jafo.usuario u
+		on c.usuario_codigo = u.codigo
+	inner join jafo.usuario_domicilio ud
+		on ud.usuario_codigo = u.codigo
+	inner join jafo.domicilio dom
+		on dom.codigo = ud.domicilio_codigo
+	inner join jafo.localidad loc
+		on dom.localidad_codigo = loc.codigo
+	inner join jafo.provincia prov
+		on loc.provincia_codigo = prov.codigo
+	inner join jafo.bi_dim_ubicacion ubi
+		on ubi.localidad = loc.nombre
+		and ubi.provincia = prov.nombre
+commit 
+go
+
+create procedure jafo.migracion_hechos_ventas
+as
+begin tran
+	insert into jafo.bi_hechos_ventas (idRangoHorario, importe_total, idRangoEtario, idRubro, idTiempo, idCliente)
+	select jafo.getRangoHorarioPorFecha(envio.fecha_entrega),
+	v.total,
+	jafo.getAgeRange(c.edad),
+	prod.idRubro,
+	jafo.obtener_id_tiempo(v.fecha),
+	c.idCliente
+	from jafo.venta v
+	inner join jafo.envio envio
+		on envio.venta_codigo = v.codigo
+	inner join jafo.dim_cliente c
+		on c.idCliente = v.cliente_codigo
+	inner join jafo.detalle_venta dv
+		on dv.venta_codigo = v.codigo
+	inner join publicacion publi
+		on publi.codigo = dv.publicacion_codigo
+	inner join jafo.bi_dim_producto prod
+		on prod.id_producto = publi.producto_id
+commit 
 
 -----------------EJECUCIONES--------------------------------------------------------
 EXEC JAFO.migracion_bi_dim_tiempo
@@ -252,6 +307,10 @@ exec jafo.migracion_dim_ubicacion
 exec jafo.migracion_dim_almacen
 exec jafo.migracion_dim_rubro
 exec jafo.migracion_bi_dim_rango_etario 
+exec jafo.migracion_dim_rango_horario
+exec jafo.migracion_dim_cliente
+exec jafo.migracion_dim_cliente_ubicacion
+exec jafo.migracion_hechos_ventas
 
 --borrar tablas
 truncate table jafo.bi_hecho_publicacion

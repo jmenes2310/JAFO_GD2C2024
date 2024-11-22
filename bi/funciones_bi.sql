@@ -77,7 +77,7 @@ as
 begin
 	declare @id int
 	if(DATEPART(HOUR,@fechaHora) between 0 and 5) 
-		set @id = (select idRangoHorario from jafo.bi_dim_rango_horario where descripcion_rango = ('00:00-06:00'))
+		set @id = (select dim.idRangoHorario from jafo.bi_dim_rango_horario dim where dim.descripcion_rango = ('00:00-06:00'))
 	else if(DATEPART(HOUR,@fechaHora) between 6 and 11) 
 		set @id = (select idRangoHorario from jafo.bi_dim_rango_horario where descripcion_rango = ('06:00-12:00'))
 	else if(DATEPART(HOUR,@fechaHora) between 12 and 17) 

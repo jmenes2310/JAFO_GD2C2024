@@ -18,3 +18,4 @@ inner JOIN jafo.bi_dim_marca dm ON dm.id_marca = hp.marca_id
 inner JOIN jafo.bi_dim_tiempo dt ON dt.id_tiempo = hp.tiempo_id
 GROUP BY dm.id_marca, dm.descripcion, dt.Anio;
 go
+
