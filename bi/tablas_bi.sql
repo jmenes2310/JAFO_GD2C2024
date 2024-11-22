@@ -51,14 +51,6 @@ create table jafo.bi_dim_ubicacion (
 )
 go
 
--- tabla de almacen
-create table jafo.bi_dim_almacen (
-	idAlmacen decimal(18,0) primary key,
-	ubicacion_id int,
-	FOREIGN KEY (ubicacion_id) REFERENCES jafo.bi_dim_ubicacion(idUbicacion)
-)
-go
-
 -- tabla rubro
 create table jafo.bi_dim_rubro (
 	idRubro int primary key,
@@ -82,9 +74,7 @@ go
 
 create table jafo.bi_dim_cliente(
 	idCliente int primary key,
-	edad int,
-	ubicacion_id int,
-	FOREIGN KEY (ubicacion_id) REFERENCES jafo.bi_dim_ubicacion(idUbicacion)
+	edad int
 )
 
 -- Tabla de hechos ventas
@@ -93,22 +83,28 @@ create table jafo.bi_hechos_ventas (
 	idRangoEtario int,
 	idRubro int,
 	idTiempo int,
-	idAlmacen decimal(18,0),
-	idCliente int,
+	idUbicacionAlmacen int,
+	idUbicacionCliente int,
 	importe_total decimal(18,2),
 	foreign key (idRangoHorario) references jafo.bi_dim_rango_horario(idRangoHorario),
 	foreign key (idRangoEtario) references jafo.bi_dim_rango_etario(idRangoEtario),
 	foreign key (idRubro) references jafo.bi_dim_rubro(idRubro),
 	foreign key (idTiempo) references jafo.bi_dim_tiempo(id_tiempo),
-	foreign key (idAlmacen) references jafo.bi_dim_almacen(idAlmacen),
-	foreign key (idCliente) references jafo.bi_dim_cliente(idCliente)
+	foreign key (idUbicacionAlmacen) references jafo.bi_dim_ubicacion(idUbicacion),
+	foreign key (idUbicacionCliente) references jafo.bi_dim_ubicacion(idUbicacion)
 )
 
--- clientes x ubicacion
-create table jafo.bi_dim_cliente_ubicacion(
-	idCliente int,
-	idUbicacion int 
-	PRIMARY KEY (idCliente, idUbicacion),
-	FOREIGN KEY (idCliente) REFERENCES jafo.bi_dim_cliente(idCliente),
-	FOREIGN KEY (idUbicacion) REFERENCES jafo.bi_dim_ubicacion(idUbicacion)
-)
+-- Eliminar tablas de hechos primero, ya que dependen de dimensiones
+DROP TABLE IF EXISTS jafo.bi_hechos_ventas;
+DROP TABLE IF EXISTS jafo.bi_hecho_publicacion;
+
+-- Eliminar dimensiones relacionadas después
+DROP TABLE IF EXISTS jafo.bi_dim_producto;
+DROP TABLE IF EXISTS jafo.bi_dim_cliente;
+DROP TABLE IF EXISTS jafo.bi_dim_rango_horario;
+DROP TABLE IF EXISTS jafo.bi_dim_rango_etario;
+DROP TABLE IF EXISTS jafo.bi_dim_rubro;
+DROP TABLE IF EXISTS jafo.bi_dim_ubicacion;
+DROP TABLE IF EXISTS jafo.bi_dim_marca;
+DROP TABLE IF EXISTS jafo.bi_dim_subrubro;
+DROP TABLE IF EXISTS jafo.bi_dim_tiempo;

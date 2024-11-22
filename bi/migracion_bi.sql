@@ -200,24 +200,6 @@ begin transaction
 commit
 go
 
-create procedure jafo.migracion_dim_almacen 
-as
-begin tran
-	insert into jafo.bi_dim_almacen
-	select alm.codigo, ubi.idUbicacion
-	from jafo.almacen alm
-	inner join jafo.domicilio dom
-		on dom.codigo = alm.domicilio_codigo
-	inner join jafo.localidad loc
-		on dom.localidad_codigo = loc.codigo
-	inner join jafo.provincia prov
-		on loc.provincia_codigo = prov.codigo
-	inner join jafo.bi_dim_ubicacion ubi
-		on ubi.localidad = loc.nombre
-		and ubi.provincia = prov.nombre
-commit
-go
-
 create procedure jafo.migracion_dim_rubro
 as
 begin tran
@@ -243,85 +225,72 @@ begin transaction
 commit
 go
 
-create procedure jafo.migracion_dim_cliente
+-- Borrar
+alter procedure jafo.migracion_dim_cliente
 as
 begin transaction
 	insert into jafo.bi_dim_cliente
 	select c.codigo,
-		   DATEDIFF(year, getdate(), c.fecha_nacimiento)
+		   DATEDIFF(year, c.fecha_nacimiento, getdate())
 	from cliente c
 commit
-go
-
-create procedure jafo.migracion_dim_cliente_ubicacion
-as
-begin transaction 
-	insert into jafo.bi_dim_cliente_ubicacion
-	select c.codigo, ubi.idUbicacion from jafo.cliente c
-	inner join jafo.usuario u
-		on c.usuario_codigo = u.codigo
-	inner join jafo.usuario_domicilio ud
-		on ud.usuario_codigo = u.codigo
-	inner join jafo.domicilio dom
-		on dom.codigo = ud.domicilio_codigo
-	inner join jafo.localidad loc
-		on dom.localidad_codigo = loc.codigo
-	inner join jafo.provincia prov
-		on loc.provincia_codigo = prov.codigo
-	inner join jafo.bi_dim_ubicacion ubi
-		on ubi.localidad = loc.nombre
-		and ubi.provincia = prov.nombre
-commit 
 go
 
 create procedure jafo.migracion_hechos_ventas
 as
 begin tran
-	insert into jafo.bi_hechos_ventas (idRangoHorario, importe_total, idRangoEtario, idRubro, idTiempo, idCliente)
-	select jafo.getRangoHorarioPorFecha(envio.fecha_entrega),
-	v.total,
-	jafo.getAgeRange(c.edad),
-	prod.idRubro,
-	jafo.obtener_id_tiempo(v.fecha),
-	c.idCliente
+	insert into jafo.bi_hechos_ventas (idRangoHorario, importe_total, idRangoEtario, idRubro, idTiempo, idUbicacionAlmacen, idUbicacionCliente)
+	select 
+		(select jafo.getRangoHorarioPorFecha(envio.fecha_entrega)),
+		v.total,
+		(select jafo.getAgeRange(c.edad)),
+		prod.idRubro,
+		(select jafo.obtener_id_tiempo(cast(v.fecha as datetime))),
+		(select jafo.getIdUbicacionPorIdDomicilio(publi.almacen_domicilio_codigo)),
+		(select jafo.getIdUbicacionPorIdDomicilio(envio.domicilio_codigo))
 	from jafo.venta v
 	inner join jafo.envio envio
 		on envio.venta_codigo = v.codigo
-	inner join jafo.dim_cliente c
+	inner join jafo.bi_dim_cliente c
 		on c.idCliente = v.cliente_codigo
 	inner join jafo.detalle_venta dv
 		on dv.venta_codigo = v.codigo
-	inner join publicacion publi
+	inner join jafo.publicacion publi
 		on publi.codigo = dv.publicacion_codigo
 	inner join jafo.bi_dim_producto prod
 		on prod.id_producto = publi.producto_id
 commit 
 
+select jafo.getAgeRange(edad) from jafo.bi_dim_cliente
+select jafo.getRangoHorarioPorFecha(fecha_entrega) from jafo.envio
+select jafo.getIdUbicacionPorIdDomicilio(almacen.domicilio_codigo) from jafo.almacen
+select jafo.obtener_id_tiempo(cast(fecha as datetime)) from venta
+select * from jafo.bi_dim_ubicacion
+select * from jafo.bi_dim_rango_horario
+select * from jafo.bi_hechos_ventas
+
 -----------------EJECUCIONES--------------------------------------------------------
 EXEC JAFO.migracion_bi_dim_tiempo
 EXEC jafo.migracion_bi_dim_subrubro
 exec jafo.migracion_bi_dim_marca
+exec jafo.migracion_dim_rubro
 exec jafo.migracion_bi_dim_producto
 exec jafo.migracion_bi_hecho_publicacion
 exec jafo.migracion_dim_ubicacion
-exec jafo.migracion_dim_almacen
-exec jafo.migracion_dim_rubro
 exec jafo.migracion_bi_dim_rango_etario 
 exec jafo.migracion_dim_rango_horario
 exec jafo.migracion_dim_cliente
-exec jafo.migracion_dim_cliente_ubicacion
 exec jafo.migracion_hechos_ventas
 
---borrar tablas
-truncate table jafo.bi_hecho_publicacion
-drop table jafo.bi_dim_producto
-drop table jafo.bi_dim_marca
-drop table jafo.bi_dim_subrubro
-drop table jafo.bi_dim_tiempo
-
-
---drop procedure JAFO.migracion_bi_dim_tiempo
---drop procedure jafo.migracion_bi_dim_subrubro
---drop procedure jafo.migracion_bi_dim_marca
---drop procedure jafo.migracion_bi_dim_producto
---drop procedure jafo.migracion_bi_hecho_publicacion
+-- Eliminar procedimientos en el orden correcto
+DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_tiempo;
+DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_subrubro;
+DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_marca;
+DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_producto;
+DROP PROCEDURE IF EXISTS jafo.migracion_bi_hecho_publicacion;
+DROP PROCEDURE IF EXISTS jafo.migracion_dim_ubicacion;
+DROP PROCEDURE IF EXISTS jafo.migracion_dim_rubro;
+DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_rango_etario;
+DROP PROCEDURE IF EXISTS jafo.migracion_dim_rango_horario;
+DROP PROCEDURE IF EXISTS jafo.migracion_dim_cliente;
+DROP PROCEDURE IF EXISTS jafo.migracion_hechos_ventas;

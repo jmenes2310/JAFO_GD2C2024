@@ -1,5 +1,4 @@
 -----------------FUCIONES--------------------------------------------------------
-go
 CREATE FUNCTION jafo.obtener_id_tiempo (@fecha datetime) 
 RETURNS varchar(10)								 
 AS
@@ -85,5 +84,28 @@ begin
 	else 
 		set @id = (select idRangoHorario from jafo.bi_dim_rango_horario where descripcion_rango = ('18:00-24:00'))
 	return @id
+end
+go
+
+select * from jafo.bi_dim_rango_horario
+
+create function jafo.getIdUbicacionPorIdDomicilio(@codigo_domicilio int)
+returns int 
+as
+begin 
+	declare @idUbicacion int
+	set @idUbicacion = (
+		select ubi.idUbicacion
+		from jafo.domicilio domi
+		inner join jafo.localidad loc
+			on loc.codigo = domi.localidad_codigo
+		inner join jafo.provincia prov
+			on loc.provincia_codigo = prov.codigo
+		inner join jafo.bi_dim_ubicacion ubi
+			on ubi.localidad = loc.nombre
+			and ubi.provincia = prov.nombre
+		where domi.codigo = @codigo_domicilio
+	)
+	return @idUbicacion
 end
 go
