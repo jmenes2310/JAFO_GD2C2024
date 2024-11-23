@@ -175,5 +175,5 @@ create table jafo.bi_hechos_detalle_factura(
 --drop table if exists jafo.bi_hechos_pagos;
 --drop table if exists jafo.bi_dim_concepto;
 --drop table if exists jafo.bi_dim_factura;
---drop table if exists bi_tipo_envio;
+--drop table if exists jafo.bi_tipo_envio;
 

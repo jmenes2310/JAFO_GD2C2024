@@ -433,7 +433,7 @@ exec jafo.migracion_dim_concepto
 exec jafo.migracion_dim_factura
 exec jafo.migracion_hechos_detalle_factura
 
----- Eliminar procedimientos en el orden correcto
+------ Eliminar procedimientos en el orden correcto
 --DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_tiempo;
 --DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_subrubro;
 --DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_marca;
@@ -449,6 +449,6 @@ exec jafo.migracion_hechos_detalle_factura
 --drop procedure if exists jafo.migracion_hechos_pago
 --drop procedure if exists jafo.migracion_dim_concepto
 --drop procedure if exists jafo.migracion_dim_factura
---drop procedure if exists jafo.bi_hechos_detalle_factura
-
-select * from jafo.bi_hechos_detalle_factura
+--drop procedure if exists jafo.migracion_hechos_detalle_factura 
+--drop procedure if exists jafo.migracion_tipo_envio
+--drop procedure if exists jafo.migracion_hechos_envio
