@@ -114,6 +114,24 @@ create table jafo.bi_hechos_pagos(
 
 )
 
+create table jafo.bi_tipo_envio(
+	 idTipoEnvio int primary key
+	,nombre nvarchar(200)
+)
+
+
+create table jafo.bi_hechos_envios(
+	 idUbicacionAlmacen int
+	,idUbicacionCliente int
+	,idTipoEnvio int
+	,idTiempo int
+	,llegoATiempo bit
+	,costo decimal(18,2)
+	 foreign key (idUbicacionAlmacen) references jafo.bi_dim_ubicacion(idUbicacion)
+	,foreign key (idUbicacionCliente) references jafo.bi_dim_ubicacion(idUbicacion)
+	,foreign key (idTiempo) references jafo.bi_dim_tiempo(id_tiempo)
+)
+
 -- Eliminar tablas de hechos primero, ya que dependen de dimensiones
 --DROP TABLE IF EXISTS jafo.bi_hechos_ventas;
 --DROP TABLE IF EXISTS jafo.bi_hecho_publicacion;
@@ -131,3 +149,11 @@ create table jafo.bi_hechos_pagos(
 --DROP TABLE IF EXISTS jafo.bi_dim_tiempo;
 --drop table if exists jafo.bi_dim_medio_pago
 --drop table if exists jafo.bi_hechos_pagos;
+
+
+select numero, concepto_codigo, sum(subtotal) from jafo.factura f
+inner join jafo.detalle_factura df on df.factura_numero =  f.numero and f.numero = 112313
+group by  numero, concepto_codigo
+--having (count(*)>1)
+
+

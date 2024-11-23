@@ -316,7 +316,61 @@ begin
 
 end
 
+go
 
+create procedure jafo.migracion_tipo_envio
+as
+begin
+	begin try
+		begin tran
+			
+			insert into jafo.bi_tipo_envio
+				select te.codigo, te.nombre
+				from jafo.tipo_envio te
+
+		commit tran
+	end try
+	begin catch
+		rollback transaction
+		DECLARE @error nvarchar(max) = CONCAT('Error al migrar tipo envio: ', ERROR_MESSAGE())
+		RAISERROR(@error,16,1)
+	end catch
+
+end
+go
+
+--hechos envio
+create procedure jafo.migracion_hechos_envio
+as
+begin
+	begin try
+		begin tran
+			
+			insert into jafo.bi_hechos_envios
+				select 
+					 jafo.getIdUbicacionPorIdDomicilio(p.almacen_domicilio_codigo)
+					,jafo.getIdUbicacionPorIdDomicilio(e.domicilio_codigo)
+					,e.tipo_envio_codigo
+					,jafo.obtener_id_tiempo(e.fecha_entrega)
+					,case 
+						when cast(e.fecha_entrega as date) = cast(fecha_programada as date) and DATEPART(HOUR, e.fecha_entrega) between e.horario_inicio and e.hora_fin_inicio
+							then 1
+							else 0
+					 end
+					,e.costo
+				from jafo.envio e
+				inner join jafo.detalle_venta dv on dv.venta_codigo = e.venta_codigo
+				inner join jafo.publicacion p on p.codigo = dv.publicacion_codigo
+
+		commit tran
+	end try
+	begin catch
+		rollback transaction
+		DECLARE @error nvarchar(max) = CONCAT('Error al migrar hechos de envio ', ERROR_MESSAGE())
+		RAISERROR(@error,16,1)
+	end catch
+
+end
 
 
 -------------------EJECUCIONES--------------------------------------------------------
@@ -333,8 +387,8 @@ exec jafo.migracion_dim_cliente
 exec jafo.migracion_hechos_ventas
 exec jafo.migracion_dim_medio_pago
 exec jafo.migracion_hechos_pago
-
-
+exec jafo.migracion_tipo_envio
+exec jafo.migracion_hechos_envio
 
 ---- Eliminar procedimientos en el orden correcto
 --DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_tiempo;
