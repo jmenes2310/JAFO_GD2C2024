@@ -372,33 +372,46 @@ begin
 	end catch
 
 end
+go
 
 --migracion dim concepto
 create procedure jafo.migracion_dim_concepto 
 as
 begin tran
-	insert into jafo.bi_dim_concepto (factura_codigo, total_concepto, nombre_concepto)
-	select df.factura_numero, df.subtotal, conc.nombre
-	from detalle_factura df
-	inner join jafo.concepto conc
-		on df.concepto_codigo = conc.codigo
+	insert into jafo.bi_dim_concepto (idConcepto, nombre_concepto)
+	select conc.codigo, conc.nombre from jafo.concepto conc
 commit tran 
 go
--- migracion hechos factura
-create procedure jafo.migracion_hechos_facturas
+
+-- migracion dim factura
+
+create procedure jafo.migracion_dim_factura
 as
 begin tran
-	insert into jafo.bi_hechos_facturas (total, idUbicacionVendedor, idTiempo, idConcepto)
-	select f.total,
-	(select top 1 jafo.getIdUbicacionPorIdDomicilio(ud.domicilio_codigo)),
-	(select jafo.obtener_id_tiempo(cast(f.fecha as datetime))),
-	conc.idConcepto
-	from jafo.factura f
-	inner join usuario_domicilio ud
-		on ud.usuario_codigo = f.usuario_codigo
-	inner join jafo.bi_dim_concepto conc
-		on f.numero = conc.factura_codigo
+	insert into jafo.bi_dim_factura(idFactura, factura_total)
+	select f.numero, f.total from jafo.factura f
 commit tran
+go
+-- migracion hechos detalle factura 
+create procedure jafo.migracion_hechos_detalle_factura 
+as
+begin tran
+	insert into jafo.bi_hechos_detalle_factura (idConcepto, idFactura, fecha_factura, detalle_total, idUbicacionVendedor, idTiempo)
+	select df.concepto_codigo,
+		   df.factura_numero,
+		   f.fecha,
+		   df.subtotal,
+		   (select jafo.getIdUbicacionPorIdDomicilio(ud.domicilio_codigo)),
+		   (select jafo.obtener_id_tiempo(cast(f.fecha as datetime)))
+	from detalle_factura df
+	inner join jafo.factura f
+		on df.factura_numero = f.numero 
+	inner join jafo.usuario_domicilio ud
+		on f.usuario_codigo = ud.usuario_codigo
+		and ud.domicilio_codigo =
+			(select top 1 ud1.domicilio_codigo from jafo.usuario_domicilio ud1 where ud.usuario_codigo = ud1.usuario_codigo)
+commit tran
+go
 
 -------------------EJECUCIONES--------------------------------------------------------
 EXEC JAFO.migracion_bi_dim_tiempo
@@ -417,7 +430,8 @@ exec jafo.migracion_hechos_pago
 exec jafo.migracion_tipo_envio
 exec jafo.migracion_hechos_envio
 exec jafo.migracion_dim_concepto
-exec jafo.migracion_hechos_facturas
+exec jafo.migracion_dim_factura
+exec jafo.migracion_hechos_detalle_factura
 
 ---- Eliminar procedimientos en el orden correcto
 --DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_tiempo;
@@ -433,5 +447,7 @@ exec jafo.migracion_hechos_facturas
 --DROP PROCEDURE IF EXISTS jafo.migracion_hechos_ventas;
 --drop procedure if exists jafo.migracion_dim_medio_pago
 --drop procedure if exists jafo.migracion_hechos_pago
-
+--drop procedure if exists jafo.migracion_dim_concepto
+--drop procedure if exists jafo.migracion_dim_factura
+--drop procedure if exists jafo.bi_hechos_detalle_factura
 
