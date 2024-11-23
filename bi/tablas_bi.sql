@@ -155,11 +155,12 @@ create table jafo.bi_hechos_detalle_factura(
 	foreign key (idFactura) references jafo.bi_dim_factura(idFactura)
 )
 
--- Eliminar tablas de hechos primero, ya que dependen de dimensiones
+---- Eliminar tablas de hechos primero, ya que dependen de dimensiones
 --DROP TABLE IF EXISTS jafo.bi_hechos_ventas;
 --DROP TABLE IF EXISTS jafo.bi_hecho_publicacion;
 --drop table if exists jafo.bi_hechos_pagos
-
+--drop table if exists jafo.bi_hechos_detalle_factura;
+--drop table if exists jafo.bi_hechos_envios;
 ---- Eliminar dimensiones relacionadas después
 --DROP TABLE IF EXISTS jafo.bi_dim_producto;
 --DROP TABLE IF EXISTS jafo.bi_dim_cliente;
@@ -174,4 +175,5 @@ create table jafo.bi_hechos_detalle_factura(
 --drop table if exists jafo.bi_hechos_pagos;
 --drop table if exists jafo.bi_dim_concepto;
 --drop table if exists jafo.bi_dim_factura;
---drop table if exists jafo.bi_hechos_detalle_factura;
+--drop table if exists bi_tipo_envio;
+

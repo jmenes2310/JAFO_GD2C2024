@@ -161,13 +161,52 @@ INNER JOIN jafo.bi_dim_ubicacion du
 	ON he.idUbicacionCliente = du.idUbicacion
 group by du.localidad, he.costo
 order by he.costo desc
-
+go
 
 --9. Porcentaje de facturación por concepto para cada mes de cada año. Se calcula
 --en función del total del concepto sobre el total del período.
-
-
-
+create view porcentaje_facturacion_concepto as
+SELECT 
+    dc.nombre_concepto as nombreConcepto,
+    sum(hdf.detalle_total) AS TotalFacturadoConcepto,
+    CAST(
+        100.0 * sum(hdf.detalle_total) 
+        / 
+        (SELECT 
+         SUM(hdf.detalle_total)
+		 FROM jafo.bi_hechos_detalle_factura hdf
+		 INNER JOIN 
+         jafo.bi_dim_tiempo dt1 ON hdf.idTiempo = dt1.id_tiempo
+		 where dt.anio = dt1.anio and dt.mes = dt1.mes 
+		 GROUP BY dt1.anio, dt1.mes
+		) as decimal(18,2)
+    ) AS PorcentajeConcepto,
+	dt.anio,
+	dt.mes
+FROM jafo.bi_hechos_detalle_factura hdf
+inner join jafo.bi_dim_concepto dc
+    on dc.idConcepto = hdf.idConcepto
+INNER JOIN jafo.bi_dim_tiempo dt 
+    ON hdf.idTiempo = dt.id_tiempo
+GROUP BY dc.nombre_concepto, dt.anio, dt.mes
+go
 
 --10. Facturación por provincia. Monto facturado según la provincia del vendedor
 --para cada cuatrimestre de cada año.
+CREATE VIEW jafo.view_facturacion_por_provincia AS
+SELECT 
+    dt.anio AS Año,
+    dt.cuatrimestre AS Cuatrimestre,
+    ub.provincia AS Provincia,
+    SUM(hdf.detalle_total) AS TotalFacturado
+FROM 
+    jafo.bi_hechos_detalle_factura hdf
+INNER JOIN 
+    jafo.bi_dim_tiempo dt ON hdf.idTiempo = dt.id_tiempo
+INNER JOIN 
+    jafo.bi_dim_ubicacion ub ON hdf.idUbicacionVendedor = ub.idUbicacion
+GROUP BY 
+    dt.anio,
+    dt.cuatrimestre,
+    ub.provincia;
+GO

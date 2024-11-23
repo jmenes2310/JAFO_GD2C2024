@@ -451,3 +451,4 @@ exec jafo.migracion_hechos_detalle_factura
 --drop procedure if exists jafo.migracion_dim_factura
 --drop procedure if exists jafo.bi_hechos_detalle_factura
 
+select * from jafo.bi_hechos_detalle_factura
