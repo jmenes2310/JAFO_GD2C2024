@@ -378,7 +378,8 @@ create procedure jafo.migracion_dim_concepto
 as
 begin tran
 	insert into jafo.bi_dim_concepto (factura_codigo, total_concepto, nombre_concepto)
-	select df.factura_numero, df.subtotal, conc.nombre from detalle_factura df
+	select df.factura_numero, df.subtotal, conc.nombre
+	from detalle_factura df
 	inner join jafo.concepto conc
 		on df.concepto_codigo = conc.codigo
 commit tran 
@@ -433,13 +434,4 @@ exec jafo.migracion_hechos_facturas
 --drop procedure if exists jafo.migracion_dim_medio_pago
 --drop procedure if exists jafo.migracion_hechos_pago
 
-select * from jafo.envio 
-select * from jafo.factura
-select * from jafo.detalle_factura order by factura_numero
-select * from jafo.tipo_envio
-select factura_codigo from jafo.bi_dim_concepto group by factura_codigo having count(*) > 1
-select venta_codigo from jafo.detalle_venta group by venta_codigo having count(distinct publicacion_codigo) > 1
 
-
-select * from jafo.bi_dim_concepto
-select * from jafo.bi_hechos_facturas

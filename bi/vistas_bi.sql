@@ -131,4 +131,43 @@ WHERE
     Ranking <= 3;
 GO
 
+--7. Porcentaje de cumplimiento de envíos en los tiempos programados por
+--provincia (del almacén) por año/mes (desvío). Se calcula teniendo en cuenta los
+--envíos cumplidos sobre el total de envíos para el período.
+create VIEW jafo.vw_cumplimiento_envios AS
+SELECT 
+    du.provincia AS Provincia,
+    t.anio AS Año,
+    t.mes AS Mes,
+    COUNT(*) AS TotalEnvios,
+    SUM(CASE WHEN he.llegoATiempo = 1 THEN 1 ELSE 0 END) AS EnviosCumplidos,
+    CAST(100.0 * SUM(CASE WHEN he.llegoATiempo = 1 THEN 1 ELSE 0 END) / COUNT(*) AS DECIMAL(5, 2)) AS PorcentajeCumplimiento
+FROM 
+    jafo.bi_hechos_envios he
+INNER JOIN jafo.bi_dim_ubicacion du 
+	ON he.idUbicacionAlmacen = du.idUbicacion
+INNER JOIN jafo.bi_dim_tiempo t 
+	ON he.idTiempo = t.id_tiempo
+GROUP BY du.provincia, t.anio, t.mes
 
+go
+
+--8. Localidades que pagan mayor costo de envío. Las 5 localidades (tomando la
+--localidad del cliente) con mayor costo de envío.
+create VIEW jafo.vw_localidades_mas_pagan AS
+select top 5 du.localidad, max(he.costo) as costoMaximo
+from jafo.bi_hechos_envios he
+INNER JOIN jafo.bi_dim_ubicacion du 
+	ON he.idUbicacionCliente = du.idUbicacion
+group by du.localidad, he.costo
+order by he.costo desc
+
+
+--9. Porcentaje de facturación por concepto para cada mes de cada año. Se calcula
+--en función del total del concepto sobre el total del período.
+
+
+
+
+--10. Facturación por provincia. Monto facturado según la provincia del vendedor
+--para cada cuatrimestre de cada año.
