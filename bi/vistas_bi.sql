@@ -86,3 +86,41 @@ GROUP BY
     dt.anio, dt.mes, rh.descripcion_rango;
 GO
 
+--6 
+CREATE VIEW jafo.view_top_3_localidades_pagos_cuotas AS
+SELECT 
+    Año,
+    Mes,
+    MedioPago,
+    Localidad,
+    TotalImporte,
+    Ranking
+FROM (
+    SELECT 
+        dt.anio AS Año,
+        dt.mes AS Mes,
+        mp.nombre AS MedioPago,
+        ub.localidad AS Localidad,
+        SUM(hp.importe) AS TotalImporte,
+        RANK() OVER (
+            PARTITION BY dt.anio, dt.mes, mp.id_medio_pago 
+            ORDER BY SUM(hp.importe) DESC
+        ) AS Ranking
+    FROM 
+        jafo.bi_hechos_pagos hp
+    INNER JOIN 
+        jafo.bi_dim_tiempo dt ON hp.dim_tiempo_id = dt.id_tiempo
+    INNER JOIN 
+        jafo.bi_dim_ubicacion ub ON hp.dim_ubicacion_id = ub.idUbicacion
+    INNER JOIN 
+        jafo.bi_dim_medio_pago mp ON hp.dim_medio_pago_id = mp.id_medio_pago
+    WHERE 
+        hp.cant_cuotas > 1
+    GROUP BY 
+        dt.anio, dt.mes, mp.id_medio_pago, mp.nombre, ub.localidad
+) subquery
+WHERE 
+    Ranking <= 3;
+GO
+
+
