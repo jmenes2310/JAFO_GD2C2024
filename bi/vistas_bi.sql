@@ -40,34 +40,42 @@ GO
 
 CREATE VIEW jafo.view_top_5_rubros_por_rendimiento AS
 SELECT 
-    dt.anio AS Año,
-    dt.cuatrimestre AS Cuatrimestre,
-    ub.localidad AS Localidad,
-    re.descripcion_rango AS RangoEtario,
-    rb.rubro AS Rubro,
-    SUM(hv.importe_total) AS TotalVentas,
-    RANK() OVER (
-        PARTITION BY dt.anio, dt.cuatrimestre, ub.localidad, re.idRangoEtario 
-        ORDER BY SUM(hv.importe_total) DESC
-    ) AS Ranking
-FROM 
-    jafo.bi_hechos_ventas hv
-INNER JOIN 
-    jafo.bi_dim_tiempo dt ON hv.idTiempo = dt.id_tiempo
-INNER JOIN 
-    jafo.bi_dim_ubicacion ub ON hv.idUbicacionCliente = ub.idUbicacion
-INNER JOIN 
-    jafo.bi_dim_rubro rb ON hv.idRubro = rb.idRubro
-INNER JOIN 
-    jafo.bi_dim_rango_etario re ON hv.idRangoEtario = re.idRangoEtario
-GROUP BY 
-    dt.anio, dt.cuatrimestre, ub.localidad, re.idRangoEtario, re.descripcion_rango, rb.rubro
-HAVING 
-    RANK() OVER (
-        PARTITION BY dt.anio, dt.cuatrimestre, ub.localidad, re.idRangoEtario 
-        ORDER BY SUM(hv.importe_total) DESC
-    ) <= 5;
+    Año,
+    Cuatrimestre,
+    Localidad,
+    RangoEtario,
+    Rubro,
+    TotalVentas,
+    Ranking
+FROM (
+    SELECT 
+        dt.anio AS Año,
+        dt.cuatrimestre AS Cuatrimestre,
+        ub.localidad AS Localidad,
+        re.descripcion_rango AS RangoEtario,
+        rb.rubro AS Rubro,
+        SUM(hv.importe_total) AS TotalVentas,
+        RANK() OVER (
+            PARTITION BY dt.anio, dt.cuatrimestre, ub.localidad, re.idRangoEtario 
+            ORDER BY SUM(hv.importe_total) DESC
+        ) AS Ranking
+    FROM 
+        jafo.bi_hechos_ventas hv
+    INNER JOIN 
+        jafo.bi_dim_tiempo dt ON hv.idTiempo = dt.id_tiempo
+    INNER JOIN 
+        jafo.bi_dim_ubicacion ub ON hv.idUbicacionCliente = ub.idUbicacion
+    INNER JOIN 
+        jafo.bi_dim_rubro rb ON hv.idRubro = rb.idRubro
+    INNER JOIN 
+        jafo.bi_dim_rango_etario re ON hv.idRangoEtario = re.idRangoEtario
+    GROUP BY 
+        dt.anio, dt.cuatrimestre, ub.localidad, re.idRangoEtario, re.descripcion_rango, rb.rubro
+) subquery
+WHERE 
+    Ranking <= 5;
 GO
+
 
 --5
 CREATE VIEW jafo.view_volumen_ventas_rango_horario AS
