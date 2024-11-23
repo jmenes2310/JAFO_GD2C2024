@@ -74,23 +74,15 @@ CREATE VIEW jafo.view_volumen_ventas_rango_horario AS
 SELECT 
     dt.anio AS Año,
     dt.mes AS Mes,
-    CASE 
-        WHEN dt.hora BETWEEN 0 AND 5 THEN 'Madrugada'
-        WHEN dt.hora BETWEEN 6 AND 11 THEN 'Mañana'
-        WHEN dt.hora BETWEEN 12 AND 17 THEN 'Tarde'
-        WHEN dt.hora BETWEEN 18 AND 23 THEN 'Noche'
-    END AS RangoHorario,
-    COUNT(hv.idVenta) AS CantidadVentas
+    rh.descripcion_rango AS RangoHorario,
+    COUNT(*) AS CantidadVentas
 FROM 
     jafo.bi_hechos_ventas hv
 INNER JOIN 
     jafo.bi_dim_tiempo dt ON hv.idTiempo = dt.id_tiempo
+INNER JOIN 
+    jafo.bi_dim_rango_horario rh ON hv.idRangoHorario = rh.idRangoHorario
 GROUP BY 
-    dt.anio, dt.mes, 
-    CASE 
-        WHEN dt.hora BETWEEN 0 AND 5 THEN 'Madrugada'
-        WHEN dt.hora BETWEEN 6 AND 11 THEN 'Mañana'
-        WHEN dt.hora BETWEEN 12 AND 17 THEN 'Tarde'
-        WHEN dt.hora BETWEEN 18 AND 23 THEN 'Noche'
-    END;
+    dt.anio, dt.mes, rh.descripcion_rango;
 GO
+

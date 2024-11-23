@@ -130,3 +130,4 @@ create table jafo.bi_hechos_pagos(
 --DROP TABLE IF EXISTS jafo.bi_dim_subrubro;
 --DROP TABLE IF EXISTS jafo.bi_dim_tiempo;
 --drop table if exists jafo.bi_dim_medio_pago
+--drop table if exists jafo.bi_hechos_pagos;
