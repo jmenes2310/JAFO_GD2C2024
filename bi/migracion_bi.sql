@@ -226,7 +226,7 @@ commit
 go
 
 -- Borrar
-alter procedure jafo.migracion_dim_cliente
+create procedure jafo.migracion_dim_cliente
 as
 begin transaction
 	insert into jafo.bi_dim_cliente
@@ -261,15 +261,65 @@ begin tran
 		on prod.id_producto = publi.producto_id
 commit 
 
-select jafo.getAgeRange(edad) from jafo.bi_dim_cliente
-select jafo.getRangoHorarioPorFecha(fecha_entrega) from jafo.envio
-select jafo.getIdUbicacionPorIdDomicilio(almacen.domicilio_codigo) from jafo.almacen
-select jafo.obtener_id_tiempo(cast(fecha as datetime)) from venta
-select * from jafo.bi_dim_ubicacion
-select * from jafo.bi_dim_rango_horario
-select * from jafo.bi_hechos_ventas
+go
 
------------------EJECUCIONES--------------------------------------------------------
+--medio pago
+create procedure jafo.migracion_dim_medio_pago
+as
+begin
+	begin try
+		begin tran
+			
+			insert into jafo.bi_dim_medio_pago
+				select mp.codigo, mp.nombre
+				from jafo.medio_pago mp
+
+
+		commit tran
+	end try
+	begin catch
+		rollback transaction
+		DECLARE @error nvarchar(max) = CONCAT('Error al migrar medio pago: ', ERROR_MESSAGE())
+		RAISERROR(@error,16,1)
+	end catch
+
+end
+
+go
+
+--hechos pago
+create procedure jafo.migracion_hechos_pago
+as
+begin
+	begin try
+		begin tran
+			
+			insert into jafo.bi_hechos_pagos
+				select 
+					 jafo.getIdUbicacionPorIdDomicilio(e.domicilio_codigo)
+					,dmp.id_medio_pago
+					,jafo.obtener_id_tiempo(p.fecha)
+					,p.importe
+					,p.cantidad_cuotas
+				from jafo.pago p
+				inner join jafo.venta v on p.venta_codigo = v.codigo
+				inner join jafo.envio e on e.venta_codigo = v.codigo
+				inner join jafo.bi_dim_medio_pago dmp on p.medio_pago_codigo = dmp.id_medio_pago
+
+		commit tran
+	end try
+	begin catch
+		rollback transaction
+		DECLARE @error nvarchar(max) = CONCAT('Error al migrar medio pago: ', ERROR_MESSAGE())
+		RAISERROR(@error,16,1)
+	end catch
+
+end
+
+
+
+
+-------------------EJECUCIONES--------------------------------------------------------
 EXEC JAFO.migracion_bi_dim_tiempo
 EXEC jafo.migracion_bi_dim_subrubro
 exec jafo.migracion_bi_dim_marca
@@ -281,16 +331,22 @@ exec jafo.migracion_bi_dim_rango_etario
 exec jafo.migracion_dim_rango_horario
 exec jafo.migracion_dim_cliente
 exec jafo.migracion_hechos_ventas
+exec jafo.migracion_dim_medio_pago
+exec jafo.migracion_hechos_pago
 
--- Eliminar procedimientos en el orden correcto
-DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_tiempo;
-DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_subrubro;
-DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_marca;
-DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_producto;
-DROP PROCEDURE IF EXISTS jafo.migracion_bi_hecho_publicacion;
-DROP PROCEDURE IF EXISTS jafo.migracion_dim_ubicacion;
-DROP PROCEDURE IF EXISTS jafo.migracion_dim_rubro;
-DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_rango_etario;
-DROP PROCEDURE IF EXISTS jafo.migracion_dim_rango_horario;
-DROP PROCEDURE IF EXISTS jafo.migracion_dim_cliente;
-DROP PROCEDURE IF EXISTS jafo.migracion_hechos_ventas;
+
+
+---- Eliminar procedimientos en el orden correcto
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_tiempo;
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_subrubro;
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_marca;
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_producto;
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_hecho_publicacion;
+--DROP PROCEDURE IF EXISTS jafo.migracion_dim_ubicacion;
+--DROP PROCEDURE IF EXISTS jafo.migracion_dim_rubro;
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_rango_etario;
+--DROP PROCEDURE IF EXISTS jafo.migracion_dim_rango_horario;
+--DROP PROCEDURE IF EXISTS jafo.migracion_dim_cliente;
+--DROP PROCEDURE IF EXISTS jafo.migracion_hechos_ventas;
+--drop procedure if exists jafo.migracion_dim_medio_pago
+--drop procedure if exists jafo.migracion_hechos_pago

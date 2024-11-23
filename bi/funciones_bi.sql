@@ -87,8 +87,8 @@ begin
 end
 go
 
-select * from jafo.bi_dim_rango_horario
 
+go
 create function jafo.getIdUbicacionPorIdDomicilio(@codigo_domicilio int)
 returns int 
 as
