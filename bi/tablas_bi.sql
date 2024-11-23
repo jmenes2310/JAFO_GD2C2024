@@ -114,7 +114,6 @@ create table jafo.bi_hechos_pagos(
 
 )
 
-<<<<<<< Updated upstream
 create table jafo.bi_tipo_envio(
 	 idTipoEnvio int primary key
 	,nombre nvarchar(200)
@@ -131,7 +130,8 @@ create table jafo.bi_hechos_envios(
 	 foreign key (idUbicacionAlmacen) references jafo.bi_dim_ubicacion(idUbicacion)
 	,foreign key (idUbicacionCliente) references jafo.bi_dim_ubicacion(idUbicacion)
 	,foreign key (idTiempo) references jafo.bi_dim_tiempo(id_tiempo)
-=======
+)
+
 create table jafo.bi_dim_concepto(
 	idConcepto int identity primary key,
 	factura_codigo decimal(18,0),
@@ -147,7 +147,6 @@ create table jafo.bi_hechos_facturas(
 	foreign key (idUbicacionVendedor) references jafo.bi_dim_ubicacion(idUbicacion),
 	foreign key (idTiempo) references jafo.bi_dim_tiempo(id_tiempo),
 	foreign key (idConcepto) references jafo.bi_dim_concepto(idConcepto)
->>>>>>> Stashed changes
 )
 
 -- Eliminar tablas de hechos primero, ya que dependen de dimensiones
@@ -167,16 +166,12 @@ create table jafo.bi_hechos_facturas(
 --DROP TABLE IF EXISTS jafo.bi_dim_tiempo;
 --drop table if exists jafo.bi_dim_medio_pago
 --drop table if exists jafo.bi_hechos_pagos;
-<<<<<<< Updated upstream
-
 
 select numero, concepto_codigo, sum(subtotal) from jafo.factura f
 inner join jafo.detalle_factura df on df.factura_numero =  f.numero and f.numero = 112313
 group by  numero, concepto_codigo
 --having (count(*)>1)
 
-
-=======
 --drop table if exists jafo.bi_dim_concepto;
 --drop table if exists jafo.bi_hechos_facturas;
->>>>>>> Stashed changes
+

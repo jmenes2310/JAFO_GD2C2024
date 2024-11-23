@@ -316,8 +316,7 @@ begin
 
 end
 go
-
-<<<<<<< Updated upstream
+-- migracion tipo envio
 go
 
 create procedure jafo.migracion_tipo_envio
@@ -373,7 +372,8 @@ begin
 	end catch
 
 end
-=======
+
+--migracion dim concepto
 create procedure jafo.migracion_dim_concepto 
 as
 begin tran
@@ -382,7 +382,8 @@ begin tran
 	inner join jafo.concepto conc
 		on df.concepto_codigo = conc.codigo
 commit tran 
-
+go
+-- migracion hechos factura
 create procedure jafo.migracion_hechos_facturas
 as
 begin tran
@@ -397,14 +398,6 @@ begin tran
 	inner join jafo.bi_dim_concepto conc
 		on f.numero = conc.factura_codigo
 commit tran
->>>>>>> Stashed changes
-
-/*
-idUbicacionVendedor int,
-	idTiempo int, 
-	idConcepto int,
-	total decimal(12,2),
-*/
 
 -------------------EJECUCIONES--------------------------------------------------------
 EXEC JAFO.migracion_bi_dim_tiempo
@@ -420,13 +413,10 @@ exec jafo.migracion_dim_cliente
 exec jafo.migracion_hechos_ventas
 exec jafo.migracion_dim_medio_pago
 exec jafo.migracion_hechos_pago
-<<<<<<< Updated upstream
 exec jafo.migracion_tipo_envio
 exec jafo.migracion_hechos_envio
-=======
 exec jafo.migracion_dim_concepto
 exec jafo.migracion_hechos_facturas
->>>>>>> Stashed changes
 
 ---- Eliminar procedimientos en el orden correcto
 --DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_tiempo;
