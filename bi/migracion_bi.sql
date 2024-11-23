@@ -315,7 +315,9 @@ begin
 	end catch
 
 end
+go
 
+<<<<<<< Updated upstream
 go
 
 create procedure jafo.migracion_tipo_envio
@@ -371,7 +373,38 @@ begin
 	end catch
 
 end
+=======
+create procedure jafo.migracion_dim_concepto 
+as
+begin tran
+	insert into jafo.bi_dim_concepto (factura_codigo, total_concepto, nombre_concepto)
+	select df.factura_numero, df.subtotal, conc.nombre from detalle_factura df
+	inner join jafo.concepto conc
+		on df.concepto_codigo = conc.codigo
+commit tran 
 
+create procedure jafo.migracion_hechos_facturas
+as
+begin tran
+	insert into jafo.bi_hechos_facturas (total, idUbicacionVendedor, idTiempo, idConcepto)
+	select f.total,
+	(select top 1 jafo.getIdUbicacionPorIdDomicilio(ud.domicilio_codigo)),
+	(select jafo.obtener_id_tiempo(cast(f.fecha as datetime))),
+	conc.idConcepto
+	from jafo.factura f
+	inner join usuario_domicilio ud
+		on ud.usuario_codigo = f.usuario_codigo
+	inner join jafo.bi_dim_concepto conc
+		on f.numero = conc.factura_codigo
+commit tran
+>>>>>>> Stashed changes
+
+/*
+idUbicacionVendedor int,
+	idTiempo int, 
+	idConcepto int,
+	total decimal(12,2),
+*/
 
 -------------------EJECUCIONES--------------------------------------------------------
 EXEC JAFO.migracion_bi_dim_tiempo
@@ -387,8 +420,13 @@ exec jafo.migracion_dim_cliente
 exec jafo.migracion_hechos_ventas
 exec jafo.migracion_dim_medio_pago
 exec jafo.migracion_hechos_pago
+<<<<<<< Updated upstream
 exec jafo.migracion_tipo_envio
 exec jafo.migracion_hechos_envio
+=======
+exec jafo.migracion_dim_concepto
+exec jafo.migracion_hechos_facturas
+>>>>>>> Stashed changes
 
 ---- Eliminar procedimientos en el orden correcto
 --DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_tiempo;
@@ -404,3 +442,14 @@ exec jafo.migracion_hechos_envio
 --DROP PROCEDURE IF EXISTS jafo.migracion_hechos_ventas;
 --drop procedure if exists jafo.migracion_dim_medio_pago
 --drop procedure if exists jafo.migracion_hechos_pago
+
+select * from jafo.envio 
+select * from jafo.factura
+select * from jafo.detalle_factura order by factura_numero
+select * from jafo.tipo_envio
+select factura_codigo from jafo.bi_dim_concepto group by factura_codigo having count(*) > 1
+select venta_codigo from jafo.detalle_venta group by venta_codigo having count(distinct publicacion_codigo) > 1
+
+
+select * from jafo.bi_dim_concepto
+select * from jafo.bi_hechos_facturas
