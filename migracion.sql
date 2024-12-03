@@ -852,7 +852,8 @@ begin
 				,modelo.codigo modelo_codigo
 				,marca.codigo marca_codigo
 			from gd_esquema.Maestra
-			inner join jafo.subrubro subrubro on PRODUCTO_SUB_RUBRO = subrubro.descripcion
+			inner join jafo.rubro rubro on PRODUCTO_RUBRO_DESCRIPCION = rubro.descripcion
+			inner join jafo.subrubro subrubro on PRODUCTO_SUB_RUBRO = subrubro.descripcion and subrubro.rubro_codigo = rubro.codigo
 			inner join jafo.modelo modelo on PRODUCTO_MOD_CODIGO = modelo.codigo
 			inner join jafo.marca marca on PRODUCTO_MARCA = marca.nombre
 		commit transaction

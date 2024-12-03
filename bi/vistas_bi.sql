@@ -5,7 +5,7 @@ IF OBJECT_ID('jafo.view_promedio_tiempo_publicaciones', 'V') IS NOT NULL
 GO
 
 create VIEW jafo.view_promedio_tiempo_publicaciones AS
-SELECT ds.nombre subrubro, dt.Anio , dt.Cuatrimestre, AVG(hp.tiempo_vigente) AS TiempoPromedio
+SELECT ds.nombre subrubro, dt.Anio , dt.Cuatrimestre, AVG(hp.tiempo_vigente_promedio) AS TiempoPromedio
 FROM jafo.bi_hecho_publicacion hp
 JOIN jafo.bi_dim_subrubro ds ON hp.subrubro_id = ds.codigo
 JOIN jafo.bi_dim_tiempo dt ON dt.id_tiempo = hp.tiempo_id
@@ -19,7 +19,7 @@ IF OBJECT_ID('jafo.view_promedio_stock_por_marca', 'V') IS NOT NULL
 GO
 
 create VIEW view_promedio_stock_por_marca AS
-SELECT dm.descripcion, dt.anio, AVG(hp.stock) AS StockPromedio
+SELECT dm.descripcion, dt.anio, AVG(hp.stock_inicial_promedio) AS StockPromedio
 FROM jafo.bi_hecho_publicacion hp
 inner JOIN jafo.bi_dim_marca dm ON dm.id_marca = hp.marca_id
 inner JOIN jafo.bi_dim_tiempo dt ON dt.id_tiempo = hp.tiempo_id
@@ -36,7 +36,7 @@ SELECT
     ub.provincia AS Provincia,
     dt.anio AS Año,
     dt.mes AS Mes,
-    AVG(hv.importe_total) AS VentaPromedioMensual
+    CAST(SUM(hv.importe_total) AS DECIMAL(18, 2)) / SUM(hv.cantidad_ventas)  AS VentaPromedioMensual
 FROM 
     jafo.bi_hechos_ventas hv
 INNER JOIN 
@@ -101,7 +101,7 @@ SELECT
     dt.anio AS Año,
     dt.mes AS Mes,
     rh.descripcion_rango AS RangoHorario,
-    COUNT(*) AS CantidadVentas
+    SUM(hv.cantidad_ventas) AS CantidadVentas
 FROM 
     jafo.bi_hechos_ventas hv
 INNER JOIN 
@@ -144,8 +144,9 @@ FROM (
         jafo.bi_dim_ubicacion ub ON hp.dim_ubicacion_id = ub.idUbicacion
     INNER JOIN 
         jafo.bi_dim_medio_pago mp ON hp.dim_medio_pago_id = mp.id_medio_pago
-    WHERE 
-        hp.cant_cuotas > 1
+    INNER JOIN
+		jafo.bi_dim_cantidad_cuotas dcc ON hp.dim_cantidad_cuotas_id = dcc.id_cantidad_cuotas 
+		AND dcc.cantidad > 1
     GROUP BY 
         dt.anio, dt.mes, mp.id_medio_pago, mp.nombre, ub.localidad
 ) subquery
@@ -165,9 +166,9 @@ SELECT
     du.provincia AS Provincia,
     t.anio AS Año,
     t.mes AS Mes,
-    COUNT(*) AS TotalEnvios,
-    SUM(CASE WHEN he.llegoATiempo = 1 THEN 1 ELSE 0 END) AS EnviosCumplidos,
-    CAST(100.0 * SUM(CASE WHEN he.llegoATiempo = 1 THEN 1 ELSE 0 END) / COUNT(*) AS DECIMAL(5, 2)) AS PorcentajeCumplimiento
+    SUM(he.cantidad_total) AS TotalEnvios,
+    SUM(he.cantidad_a_tiempo) AS EnviosCumplidos,
+    CAST(100.0 * SUM(he.cantidad_total) / SUM(he.cantidad_a_tiempo) AS DECIMAL(5, 2)) AS PorcentajeCumplimiento
 FROM 
     jafo.bi_hechos_envios he
 INNER JOIN jafo.bi_dim_ubicacion du 
@@ -184,14 +185,14 @@ IF OBJECT_ID('jafo.vw_localidades_mas_pagan', 'V') IS NOT NULL
     DROP VIEW jafo.vw_localidades_mas_pagan;
 GO
 
-create VIEW jafo.vw_localidades_mas_pagan AS
-select top 5 du.localidad, max(he.costo) as costoMaximo
-from jafo.bi_hechos_envios he
+CREATE VIEW jafo.vw_localidades_mas_pagan AS
+SELECT TOP 5 du.localidad, SUM(he.costo) AS costo
+FROM jafo.bi_hechos_envios he
 INNER JOIN jafo.bi_dim_ubicacion du 
 	ON he.idUbicacionCliente = du.idUbicacion
-group by du.localidad, he.costo
-order by he.costo desc
-go
+GROUP BY du.localidad, he.costo
+ORDER BY SUM(he.costo) DESC
+GO
 
 --9. Porcentaje de facturación por concepto para cada mes de cada año. Se calcula
 --en función del total del concepto sobre el total del período.
@@ -203,26 +204,26 @@ GO
 create view porcentaje_facturacion_concepto as
 SELECT 
     dc.nombre_concepto as nombreConcepto,
-    sum(hdf.detalle_total) AS TotalFacturadoConcepto,
+    SUM(hf.total) AS TotalFacturadoConcepto,
     CAST(
-        100.0 * sum(hdf.detalle_total) 
+        100.0 * sum(hf.total) 
         / 
         (SELECT 
-         SUM(hdf.detalle_total)
-		 FROM jafo.bi_hechos_detalle_factura hdf
+         SUM(hf.total)
+		 FROM jafo.bi_hechos_facturacion hf
 		 INNER JOIN 
-         jafo.bi_dim_tiempo dt1 ON hdf.idTiempo = dt1.id_tiempo
+         jafo.bi_dim_tiempo dt1 ON hf.idTiempo = dt1.id_tiempo
 		 where dt.anio = dt1.anio and dt.mes = dt1.mes 
 		 GROUP BY dt1.anio, dt1.mes
 		) as decimal(18,2)
     ) AS PorcentajeConcepto,
 	dt.anio,
 	dt.mes
-FROM jafo.bi_hechos_detalle_factura hdf
+FROM jafo.bi_hechos_facturacion hf
 inner join jafo.bi_dim_concepto dc
-    on dc.idConcepto = hdf.idConcepto
+    on dc.idConcepto = hf.idConcepto
 INNER JOIN jafo.bi_dim_tiempo dt 
-    ON hdf.idTiempo = dt.id_tiempo
+    ON hf.idTiempo = dt.id_tiempo
 GROUP BY dc.nombre_concepto, dt.anio, dt.mes
 go
 
@@ -237,15 +238,16 @@ SELECT
     dt.anio AS Año,
     dt.cuatrimestre AS Cuatrimestre,
     ub.provincia AS Provincia,
-    SUM(hdf.detalle_total) AS TotalFacturado
-FROM 
-    jafo.bi_hechos_detalle_factura hdf
+    SUM(hf.total) AS TotalFacturado
+FROM jafo.bi_hechos_detalle_factura hf
 INNER JOIN 
-    jafo.bi_dim_tiempo dt ON hdf.idTiempo = dt.id_tiempo
+    jafo.bi_dim_tiempo dt ON hf.idTiempo = dt.id_tiempo
 INNER JOIN 
-    jafo.bi_dim_ubicacion ub ON hdf.idUbicacionVendedor = ub.idUbicacion
+    jafo.bi_dim_ubicacion ub ON hf.idUbicacionVendedor = ub.idUbicacion
 GROUP BY 
-    dt.anio,
+	ub.provincia,
     dt.cuatrimestre,
-    ub.provincia;
+	dt.anio
+    
+    
 GO
