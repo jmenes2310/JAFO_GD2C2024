@@ -1185,6 +1185,30 @@ exec jafo.crear_tabla_detalle_venta
 exec jafo.crear_tabla_factura
 exec jafo.crear_tabla_detalle_factura
 
+--drop procedure jafo.crear_tabla_rubro
+--drop procedure jafo.crear_tabla_subrubro
+--drop procedure jafo.crear_tabla_marca
+--drop procedure jafo.crear_tabla_modelo
+--drop procedure jafo.crear_tabla_producto
+--drop procedure jafo.crear_tabla_tipo_envio
+--drop procedure jafo.crear_tabla_tipo_medio_pago
+--drop procedure jafo.crear_tabla_concepto
+--drop procedure jafo.crear_tabla_usuario
+--drop procedure jafo.crear_tabla_provincia
+--drop procedure jafo.crear_tabla_localidad
+--drop procedure jafo.crear_tabla_domicilio
+--drop procedure jafo.crear_tabla_usuario_domicilio
+--drop procedure jafo.crear_tabla_cliente
+--drop procedure jafo.crear_tabla_vendedor
+--drop procedure jafo.crear_tabla_almacen
+--drop procedure jafo.crear_tabla_publicacion
+--drop procedure jafo.crear_tabla_venta
+--drop procedure jafo.crear_tabla_envio
+--drop procedure jafo.crear_tabla_medio_pago
+--drop procedure jafo.crear_tabla_pago
+--drop procedure jafo.crear_tabla_detalle_venta
+--drop procedure jafo.crear_tabla_factura
+--drop procedure jafo.crear_tabla_detalle_factura
 --migracion
 exec jafo.migracion_rubro
 exec jafo.migracion_subrubro
@@ -1256,30 +1280,30 @@ go
 --create procedure jafo.borrarSps
 --as 
 --begin
---	drop procedure jafo.migracion_rubro
---	drop procedure jafo.migracion_subrubro
---	drop procedure jafo.migracion_provincia
---	drop procedure jafo.migracion_localidad
---	drop procedure jafo.migracion_domicilio
---	drop procedure jafo.migracion_almacen
---	drop procedure jafo.migracion_marca
---	drop procedure jafo.migracion_modelo
---	drop procedure jafo.migracion_usuario
---	drop procedure jafo.migracion_cliente
---	drop procedure jafo.migracion_vendedor
---	drop procedure jafo.migracion_usuario_domicilio
---	drop procedure jafo.migracion_producto
---	drop procedure jafo.migracion_tipo_medio_pago
---	drop procedure jafo.migracion_medio_pago
---	drop procedure jafo.migracion_venta
---	drop procedure jafo.migracion_pago
---	drop procedure jafo.migracion_tipo_envio
---	drop procedure jafo.migracion_envio
---	drop procedure jafo.migracion_publicacion
---	drop procedure jafo.migracion_detalle_venta
---	drop procedure jafo.migracion_factura
---	drop procedure jafo.migracion_concepto
---	drop procedure jafo.migracion_detalle_factura
+	--drop procedure jafo.migracion_rubro
+	--drop procedure jafo.migracion_subrubro
+	--drop procedure jafo.migracion_provincia
+	--drop procedure jafo.migracion_localidad
+	--drop procedure jafo.migracion_domicilio
+	--drop procedure jafo.migracion_almacen
+	--drop procedure jafo.migracion_marca
+	--drop procedure jafo.migracion_modelo
+	--drop procedure jafo.migracion_usuario
+	--drop procedure jafo.migracion_cliente
+	--drop procedure jafo.migracion_vendedor
+	--drop procedure jafo.migracion_usuario_domicilio
+	--drop procedure jafo.migracion_producto
+	--drop procedure jafo.migracion_tipo_medio_pago
+	--drop procedure jafo.migracion_medio_pago
+	--drop procedure jafo.migracion_venta
+	--drop procedure jafo.migracion_pago
+	--drop procedure jafo.migracion_tipo_envio
+	--drop procedure jafo.migracion_envio
+	--drop procedure jafo.migracion_publicacion
+	--drop procedure jafo.migracion_detalle_venta
+	--drop procedure jafo.migracion_factura
+	--drop procedure jafo.migracion_concepto
+	--drop procedure jafo.migracion_detalle_factura
 
 --end
 
@@ -1291,4 +1315,3 @@ go
 --drop procedure jafo.borrarSps
 
 --drop schema jafo
-

@@ -239,7 +239,7 @@ SELECT
     dt.cuatrimestre AS Cuatrimestre,
     ub.provincia AS Provincia,
     SUM(hf.total) AS TotalFacturado
-FROM jafo.bi_hechos_detalle_factura hf
+FROM jafo.bi_hechos_facturacion hf
 INNER JOIN 
     jafo.bi_dim_tiempo dt ON hf.idTiempo = dt.id_tiempo
 INNER JOIN 
@@ -248,6 +248,4 @@ GROUP BY
 	ub.provincia,
     dt.cuatrimestre,
 	dt.anio
-    
-    
 GO

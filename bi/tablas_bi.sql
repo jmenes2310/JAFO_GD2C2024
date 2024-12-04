@@ -147,16 +147,16 @@ create table jafo.bi_hechos_facturacion(
 ---- Eliminar tablas de hechos primero, ya que dependen de dimensiones
 --DROP TABLE IF EXISTS jafo.bi_hechos_ventas;
 --DROP TABLE IF EXISTS jafo.bi_hecho_publicacion;
---drop table if exists jafo.bi_hechos_pagos
+--drop table if exists jafo.bi_hechos_pagos;
 --drop table if exists jafo.bi_hechos_facturacion;
 --drop table if exists jafo.bi_hechos_envios;
 ------ Eliminar dimensiones relacionadas después
 --DROP TABLE IF EXISTS jafo.bi_dim_rango_horario;
 --DROP TABLE IF EXISTS jafo.bi_dim_rango_etario;
---DROP TABLE IF EXISTS jafo.bi_dim_rubro;
 --DROP TABLE IF EXISTS jafo.bi_dim_ubicacion;
 --DROP TABLE IF EXISTS jafo.bi_dim_marca;
 --DROP TABLE IF EXISTS jafo.bi_dim_subrubro;
+--DROP TABLE IF EXISTS jafo.bi_dim_rubro;
 --DROP TABLE IF EXISTS jafo.bi_dim_tiempo;
 --drop table if exists jafo.bi_dim_medio_pago
 --drop table if exists jafo.bi_dim_cantidad_cuotas

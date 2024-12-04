@@ -5,7 +5,7 @@ as
 begin tran
 	IF OBJECT_ID('jafo.bi_dim_tiempo', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_tiempo;
 	create table jafo.bi_dim_tiempo(
-		id_tiempo int identity(1,1) primary key
+		 id_tiempo int identity(1,1) primary key
 		,anio int
 		,cuatrimestre int
 		,mes int
@@ -18,10 +18,10 @@ CREATE PROCEDURE jafo.creacion_dim_subrubro
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_dim_subrubro', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_subrubro;
-    CREATE TABLE jafo.bi_dim_subrubro(
-        codigo INT PRIMARY KEY,
-        nombre NVARCHAR(200)
-    );
+	create table jafo.bi_dim_subrubro(
+		 codigo int primary key
+		,nombre nvarchar(200)
+	);
 COMMIT TRAN;
 GO
 --marca
@@ -29,10 +29,10 @@ CREATE PROCEDURE jafo.creacion_dim_marca
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_dim_marca', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_marca;
-    CREATE TABLE jafo.bi_dim_marca(
-        id_marca INT PRIMARY KEY,
-        descripcion NVARCHAR(200)
-    );
+	create table jafo.bi_dim_marca (
+		id_marca int primary key,
+		descripcion nvarchar(200) 
+	);
 COMMIT TRAN;
 GO
 
@@ -41,48 +41,29 @@ CREATE PROCEDURE jafo.creacion_dim_rubro
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_dim_rubro', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_rubro;
-    CREATE TABLE jafo.bi_dim_rubro(
-        idRubro INT PRIMARY KEY,
-        rubro NVARCHAR(100)
-    );
+    create table jafo.bi_dim_rubro (
+		idRubro int primary key,
+		rubro nvarchar(100)
+	);
 COMMIT TRAN;
 GO
-
-
---producto
-CREATE PROCEDURE jafo.creacion_dim_producto
-AS
-BEGIN TRAN
-    IF OBJECT_ID('jafo.bi_dim_producto', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_producto;
-    CREATE TABLE jafo.bi_dim_producto(
-        id_producto INT PRIMARY KEY,
-        sub_rubro_codigo INT,
-        marca_codigo INT,
-        idRubro INT,
-        FOREIGN KEY (sub_rubro_codigo) REFERENCES jafo.bi_dim_subrubro(codigo),
-        FOREIGN KEY (marca_codigo) REFERENCES jafo.bi_dim_marca(id_marca),
-        FOREIGN KEY (idRubro) REFERENCES jafo.bi_dim_rubro(idRubro)
-    );
-COMMIT TRAN;
-GO
-
 
 --publicacion
 CREATE PROCEDURE jafo.creacion_hecho_publicacion
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_hecho_publicacion', 'U') IS NOT NULL DROP TABLE jafo.bi_hecho_publicacion;
-    CREATE TABLE jafo.bi_hecho_publicacion(
-        subrubro_id INT,
-        marca_id INT,
-        tiempo_id INT,
-        fecha_inicio DATETIME,
-        tiempo_vigente INT,
-        stock DECIMAL(18,0),
-        FOREIGN KEY (subrubro_id) REFERENCES jafo.bi_dim_subrubro(codigo),
-        FOREIGN KEY (marca_id) REFERENCES jafo.bi_dim_marca(id_marca),
-        FOREIGN KEY (tiempo_id) REFERENCES jafo.bi_dim_tiempo(id_tiempo)
-    );
+	create table jafo.bi_hecho_publicacion(
+		 subrubro_id int
+		,marca_id int
+		,tiempo_id int
+		,tiempo_vigente_promedio decimal(18,2)
+		,stock_inicial_promedio decimal (18,2)
+		primary key (subrubro_id,marca_id,tiempo_id)
+		 FOREIGN KEY (subrubro_id) REFERENCES jafo.bi_dim_subrubro
+		,FOREIGN KEY (marca_id) REFERENCES jafo.bi_dim_marca
+		,FOREIGN KEY (tiempo_id) REFERENCES jafo.bi_dim_tiempo
+	);
 COMMIT TRAN;
 GO
 
@@ -92,11 +73,11 @@ CREATE PROCEDURE jafo.creacion_dim_ubicacion
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_dim_ubicacion', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_ubicacion;
-    CREATE TABLE jafo.bi_dim_ubicacion(
-        idUbicacion INT IDENTITY(1,1) PRIMARY KEY,
-        provincia NVARCHAR(100),
-        localidad NVARCHAR(100)
-    );
+	create table jafo.bi_dim_ubicacion (
+		idUbicacion int identity (1,1) primary key,
+		provincia nvarchar(100),
+		localidad nvarchar(100)
+	);
 COMMIT TRAN;
 GO
 
@@ -106,10 +87,10 @@ CREATE PROCEDURE jafo.creacion_dim_rango_etario
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_dim_rango_etario', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_rango_etario;
-    CREATE TABLE jafo.bi_dim_rango_etario(
-        idRangoEtario INT IDENTITY(1,1) PRIMARY KEY,
-        descripcion_rango VARCHAR(20)
-    );
+	create table jafo.bi_dim_rango_etario (
+		idRangoEtario INT IDENTITY(1,1) PRIMARY KEY,
+		descripcion_rango VARCHAR(20)
+	);
 COMMIT TRAN;
 GO
 
@@ -119,21 +100,10 @@ CREATE PROCEDURE jafo.creacion_dim_rango_horario
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_dim_rango_horario', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_rango_horario;
-    CREATE TABLE jafo.bi_dim_rango_horario(
-        idRangoHorario INT IDENTITY(1,1) PRIMARY KEY,
-        descripcion_rango NVARCHAR(100)
-    );
-COMMIT TRAN;
-GO
-
-CREATE PROCEDURE jafo.creacion_dim_cliente
-AS
-BEGIN TRAN
-    IF OBJECT_ID('jafo.bi_dim_cliente', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_cliente;
-    CREATE TABLE jafo.bi_dim_cliente(
-        idCliente INT PRIMARY KEY,
-        edad INT
-    );
+	create table jafo.bi_dim_rango_horario(
+		idRangoHorario int identity (1,1) primary key,
+		descripcion_rango nvarchar(100)
+	);
 COMMIT TRAN;
 GO
 
@@ -142,21 +112,23 @@ CREATE PROCEDURE jafo.creacion_hechos_ventas
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_hechos_ventas', 'U') IS NOT NULL DROP TABLE jafo.bi_hechos_ventas;
-    CREATE TABLE jafo.bi_hechos_ventas(
-        idRangoHorario INT,
-        idRangoEtario INT,
-        idRubro INT,
-        idTiempo INT,
-        idUbicacionAlmacen INT,
-        idUbicacionCliente INT,
-        importe_total DECIMAL(18,2),
-        FOREIGN KEY (idRangoHorario) REFERENCES jafo.bi_dim_rango_horario(idRangoHorario),
-        FOREIGN KEY (idRangoEtario) REFERENCES jafo.bi_dim_rango_etario(idRangoEtario),
-        FOREIGN KEY (idRubro) REFERENCES jafo.bi_dim_rubro(idRubro),
-        FOREIGN KEY (idTiempo) REFERENCES jafo.bi_dim_tiempo(id_tiempo),
-        FOREIGN KEY (idUbicacionAlmacen) REFERENCES jafo.bi_dim_ubicacion(idUbicacion),
-        FOREIGN KEY (idUbicacionCliente) REFERENCES jafo.bi_dim_ubicacion(idUbicacion)
-    );
+	create table jafo.bi_hechos_ventas (
+		idRangoHorario int,
+		idRangoEtario int,
+		idRubro int,
+		idTiempo int,
+		idUbicacionAlmacen int,
+		idUbicacionCliente int,
+		importe_total decimal(18,2),
+		cantidad_ventas int
+		primary key (idRangoHorario,idRangoEtario,idRubro,idTiempo,idUbicacionAlmacen,idUbicacionCliente)
+		foreign key (idRangoHorario) references jafo.bi_dim_rango_horario(idRangoHorario),
+		foreign key (idRangoEtario) references jafo.bi_dim_rango_etario(idRangoEtario),
+		foreign key (idRubro) references jafo.bi_dim_rubro(idRubro),
+		foreign key (idTiempo) references jafo.bi_dim_tiempo(id_tiempo),
+		foreign key (idUbicacionAlmacen) references jafo.bi_dim_ubicacion(idUbicacion),
+		foreign key (idUbicacionCliente) references jafo.bi_dim_ubicacion(idUbicacion)
+	);
 COMMIT TRAN;
 GO
 
@@ -165,10 +137,22 @@ CREATE PROCEDURE jafo.creacion_dim_medio_pago
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_dim_medio_pago', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_medio_pago;
-    CREATE TABLE jafo.bi_dim_medio_pago(
-        id_medio_pago INT PRIMARY KEY,
-        nombre NVARCHAR(200)
-    );
+	create table jafo.bi_dim_medio_pago(
+		 id_medio_pago int primary key
+		,nombre nvarchar(200)
+	);
+COMMIT TRAN;
+GO
+
+-- cantidad de cuotas
+CREATE PROCEDURE jafo.creacion_dim_cantidad_cuotas
+AS
+BEGIN TRAN
+    IF OBJECT_ID('jafo.bi_dim_cantidad_cuotas', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_cantidad_cuotas;
+	create table jafo.bi_dim_cantidad_cuotas(
+		 id_cantidad_cuotas int identity(1,1) primary key
+		,cantidad decimal(18,0)
+	)
 COMMIT TRAN;
 GO
 
@@ -177,16 +161,18 @@ CREATE PROCEDURE jafo.creacion_hechos_pagos
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_hechos_pagos', 'U') IS NOT NULL DROP TABLE jafo.bi_hechos_pagos;
-    CREATE TABLE jafo.bi_hechos_pagos(
-        dim_ubicacion_id INT,
-        dim_medio_pago_id INT,
-        dim_tiempo_id INT,
-        importe DECIMAL(18,2),
-        cant_cuotas DECIMAL(18,0),
-        FOREIGN KEY (dim_ubicacion_id) REFERENCES jafo.bi_dim_ubicacion(idUbicacion),
-        FOREIGN KEY (dim_medio_pago_id) REFERENCES jafo.bi_dim_medio_pago(id_medio_pago),
-        FOREIGN KEY (dim_tiempo_id) REFERENCES jafo.bi_dim_tiempo(id_tiempo)
-    );
+	create table jafo.bi_hechos_pagos(
+		 dim_ubicacion_id int 
+		,dim_medio_pago_id int
+		,dim_tiempo_id int
+		,dim_cantidad_cuotas_id int
+		,importe decimal(18,2)
+		primary key (dim_ubicacion_id,dim_medio_pago_id,dim_tiempo_id,dim_cantidad_cuotas_id)
+		 foreign key (dim_ubicacion_id) references jafo.bi_dim_ubicacion(idUbicacion)
+		,foreign key (dim_medio_pago_id) references jafo.bi_dim_medio_pago(id_medio_pago)
+		,foreign key (dim_tiempo_id) references jafo.bi_dim_tiempo(id_tiempo)
+		,foreign key (dim_cantidad_cuotas_id) references jafo.bi_dim_cantidad_cuotas(id_cantidad_cuotas)
+	);
 COMMIT TRAN;
 GO
 
@@ -195,10 +181,10 @@ CREATE PROCEDURE jafo.creacion_dim_tipo_envio
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_tipo_envio', 'U') IS NOT NULL DROP TABLE jafo.bi_tipo_envio;
-    CREATE TABLE jafo.bi_tipo_envio(
-        idTipoEnvio INT PRIMARY KEY,
-        nombre NVARCHAR(200)
-    );
+	create table jafo.bi_tipo_envio(
+		 idTipoEnvio int primary key
+		,nombre nvarchar(200)
+	);
 COMMIT TRAN;
 GO
 
@@ -206,18 +192,19 @@ CREATE PROCEDURE jafo.creacion_hechos_envios
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_hechos_envios', 'U') IS NOT NULL DROP TABLE jafo.bi_hechos_envios;
-    CREATE TABLE jafo.bi_hechos_envios(
-        idUbicacionAlmacen INT,
-        idUbicacionCliente INT,
-        idTipoEnvio INT,
-        idTiempo INT,
-        llegoATiempo BIT,
-        costo DECIMAL(18,2),
-        FOREIGN KEY (idUbicacionAlmacen) REFERENCES jafo.bi_dim_ubicacion(idUbicacion),
-        FOREIGN KEY (idUbicacionCliente) REFERENCES jafo.bi_dim_ubicacion(idUbicacion),
-        FOREIGN KEY (idTipoEnvio) REFERENCES jafo.bi_tipo_envio(idTipoEnvio),
-        FOREIGN KEY (idTiempo) REFERENCES jafo.bi_dim_tiempo(id_tiempo)
-    );
+	create table jafo.bi_hechos_envios(
+		 idUbicacionAlmacen int
+		,idUbicacionCliente int
+		,idTipoEnvio int
+		,idTiempo int
+		,cantidad_a_tiempo int
+		,cantidad_total int
+		,costo decimal(18,2)
+		primary key (idUbicacionAlmacen, idUbicacionCliente, idTipoEnvio, idTiempo)
+		 foreign key (idUbicacionAlmacen) references jafo.bi_dim_ubicacion(idUbicacion)
+		,foreign key (idUbicacionCliente) references jafo.bi_dim_ubicacion(idUbicacion)
+		,foreign key (idTiempo) references jafo.bi_dim_tiempo(id_tiempo)
+	);
 COMMIT TRAN;
 GO
 
@@ -225,40 +212,26 @@ CREATE PROCEDURE jafo.creacion_dim_concepto
 AS
 BEGIN TRAN
     IF OBJECT_ID('jafo.bi_dim_concepto', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_concepto;
-    CREATE TABLE jafo.bi_dim_concepto(
-        idConcepto INT PRIMARY KEY,
-        nombre_concepto NVARCHAR(100)
-    );
+	create table jafo.bi_dim_concepto(
+		idConcepto int primary key,
+		nombre_concepto nvarchar(100)
+	);
 COMMIT TRAN;
 GO
 
-CREATE PROCEDURE jafo.creacion_dim_factura
+CREATE PROCEDURE jafo.creacion_hechos_facturacion
 AS
 BEGIN TRAN
-    IF OBJECT_ID('jafo.bi_dim_factura', 'U') IS NOT NULL DROP TABLE jafo.bi_dim_factura;
-    CREATE TABLE jafo.bi_dim_factura(
-        idFactura DECIMAL(18,0) PRIMARY KEY,
-        factura_total DECIMAL(18,2)
-    );
-COMMIT TRAN;
-GO
-
-CREATE PROCEDURE jafo.creacion_hechos_detalle_factura
-AS
-BEGIN TRAN
-    IF OBJECT_ID('jafo.bi_hechos_detalle_factura', 'U') IS NOT NULL DROP TABLE jafo.bi_hechos_detalle_factura;
-    CREATE TABLE jafo.bi_hechos_detalle_factura(
-        idUbicacionVendedor INT,
-        idTiempo INT,
-        idConcepto INT,
-        detalle_total DECIMAL(18,2),
-        fecha_factura DATE,
-        idFactura DECIMAL(18,0),
-        FOREIGN KEY (idUbicacionVendedor) REFERENCES jafo.bi_dim_ubicacion(idUbicacion),
-        FOREIGN KEY (idTiempo) REFERENCES jafo.bi_dim_tiempo(id_tiempo),
-        FOREIGN KEY (idConcepto) REFERENCES jafo.bi_dim_concepto(idConcepto),
-        FOREIGN KEY (idFactura) REFERENCES jafo.bi_dim_factura(idFactura)
-    );
+    IF OBJECT_ID('jafo.bi_hechos_facturacion', 'U') IS NOT NULL DROP TABLE jafo.bi_hechos_facturacion;
+	create table jafo.bi_hechos_facturacion(
+		idUbicacionVendedor int,
+		idTiempo int,
+		idConcepto int,
+		total decimal(18,2),
+		foreign key (idUbicacionVendedor) references jafo.bi_dim_ubicacion(idUbicacion),
+		foreign key (idTiempo) references jafo.bi_dim_tiempo(id_tiempo),
+		foreign key (idConcepto) references jafo.bi_dim_concepto(idConcepto),
+	);
 COMMIT TRAN;
 GO
 
@@ -266,39 +239,53 @@ EXEC jafo.creacion_dim_tiempo;
 EXEC jafo.creacion_dim_subrubro;
 EXEC jafo.creacion_dim_marca;
 EXEC jafo.creacion_dim_rubro;
-EXEC jafo.creacion_dim_producto;
 EXEC jafo.creacion_hecho_publicacion;
 EXEC jafo.creacion_dim_ubicacion;
 EXEC jafo.creacion_dim_rango_etario;
 EXEC jafo.creacion_dim_rango_horario;
-EXEC jafo.creacion_dim_cliente;
 EXEC jafo.creacion_hechos_ventas;
 EXEC jafo.creacion_dim_medio_pago;
+exec jafo.creacion_dim_cantidad_cuotas;
 EXEC jafo.creacion_hechos_pagos;
 EXEC jafo.creacion_dim_tipo_envio;
 EXEC jafo.creacion_hechos_envios;
 EXEC jafo.creacion_dim_concepto;
-EXEC jafo.creacion_dim_factura;
-EXEC jafo.creacion_hechos_detalle_factura;
+EXEC jafo.creacion_hechos_facturacion;
 go
 
------- Eliminar tablas de hechos primero, ya que dependen de dimensiones
+--drop procedure jafo.creacion_dim_tiempo;
+--drop procedure jafo.creacion_dim_subrubro;
+--drop procedure jafo.creacion_dim_marca;
+--drop procedure jafo.creacion_dim_rubro;
+--drop procedure jafo.creacion_hecho_publicacion;
+--drop procedure jafo.creacion_dim_ubicacion;
+--drop procedure jafo.creacion_dim_rango_etario;
+--drop procedure jafo.creacion_dim_rango_horario;
+--drop procedure jafo.creacion_hechos_ventas;
+--drop procedure jafo.creacion_dim_medio_pago;
+--drop procedure jafo.creacion_dim_cantidad_cuotas;
+--drop procedure jafo.creacion_hechos_pagos;
+--drop procedure jafo.creacion_dim_tipo_envio;
+--drop procedure jafo.creacion_hechos_envios;
+--drop procedure jafo.creacion_dim_concepto;
+--drop procedure jafo.creacion_hechos_facturacion;
+
+---- Eliminar tablas de hechos primero, ya que dependen de dimensiones
 --DROP TABLE IF EXISTS jafo.bi_hechos_ventas;
 --DROP TABLE IF EXISTS jafo.bi_hecho_publicacion;
---drop table if exists jafo.bi_hechos_pagos
---drop table if exists jafo.bi_hechos_detalle_factura;
+--drop table if exists jafo.bi_hechos_pagos;
+--drop table if exists jafo.bi_hechos_facturacion;
 --drop table if exists jafo.bi_hechos_envios;
 ------ Eliminar dimensiones relacionadas después
---DROP TABLE IF EXISTS jafo.bi_dim_producto;
---DROP TABLE IF EXISTS jafo.bi_dim_cliente;
 --DROP TABLE IF EXISTS jafo.bi_dim_rango_horario;
 --DROP TABLE IF EXISTS jafo.bi_dim_rango_etario;
---DROP TABLE IF EXISTS jafo.bi_dim_rubro;
 --DROP TABLE IF EXISTS jafo.bi_dim_ubicacion;
 --DROP TABLE IF EXISTS jafo.bi_dim_marca;
 --DROP TABLE IF EXISTS jafo.bi_dim_subrubro;
+--DROP TABLE IF EXISTS jafo.bi_dim_rubro;
 --DROP TABLE IF EXISTS jafo.bi_dim_tiempo;
 --drop table if exists jafo.bi_dim_medio_pago
+--drop table if exists jafo.bi_dim_cantidad_cuotas
 --drop table if exists jafo.bi_dim_concepto;
 --drop table if exists jafo.bi_dim_factura;
 --drop table if exists jafo.bi_tipo_envio;
@@ -432,6 +419,64 @@ begin
 	return @idUbicacion
 end
 go
+
+------------------------------ INDICES -----------------------------
+-- Para hechos publicacion
+create index idx_publicacion_producto_fecha_codigo ON jafo.publicacion (producto_id, fecha_inicio, codigo);
+
+create index idx_producto_id_subrubro_marca ON jafo.producto (id, subrubro_codigo, marca_codigo);
+
+-- para hechos ventas
+create index idx_venta_codigo_cliente_fecha ON jafo.venta (codigo, cliente_codigo, fecha, total);
+create index idx_envio_venta_fecha_domicilio ON jafo.envio (venta_codigo, fecha_entrega, domicilio_codigo);
+create index idx_cliente_codigo_fecha_nacimiento ON jafo.cliente (codigo, fecha_nacimiento);
+create index idx_detalle_venta_codigo_publicacion ON jafo.detalle_venta (venta_codigo, publicacion_codigo);
+create index idx_subrubro_codigo_rubro ON jafo.subrubro (codigo, rubro_codigo);
+
+create index idx_domicilio_codigo_localidad ON jafo.domicilio (codigo, localidad_codigo);
+create index idx_localidad_codigo_provincia_nombre ON jafo.localidad (codigo, provincia_codigo, nombre);
+create index idx_provincia_codigo_nombre ON jafo.provincia (codigo, nombre);
+create index idx_ubicacion_localidad_provincia ON jafo.bi_dim_ubicacion (localidad, provincia);
+
+-- para hechos pagos
+CREATE INDEX idx_pago_medio_pago_fecha_cuotas ON jafo.pago (medio_pago_codigo, fecha, cantidad_cuotas);
+
+CREATE INDEX idx_medio_pago_id ON jafo.bi_dim_medio_pago (id_medio_pago);
+
+CREATE INDEX idx_cantidad_cuotas_cantidad ON jafo.bi_dim_cantidad_cuotas (cantidad);
+
+CREATE INDEX idx_tiempo_fecha ON jafo.bi_dim_tiempo (id_tiempo);
+
+
+--DROP INDEX jafo.idx_publicacion_producto_fecha_codigo;
+
+--DROP INDEX jafo.idx_producto_id_subrubro_marca;
+
+--DROP INDEX jafo.venta.idx_venta_codigo_cliente_fecha;
+
+--DROP INDEX jafo.envio.idx_envio_venta_fecha_domicilio;
+
+--DROP INDEX jafo.cliente.idx_cliente_codigo_fecha_nacimiento;
+
+--DROP INDEX jafo.detalle_venta.idx_detalle_venta_codigo_publicacion;
+
+--DROP INDEX jafo.subrubro.idx_subrubro_codigo_rubro;
+
+--DROP INDEX jafo.domicilio.idx_domicilio_codigo_localidad;
+
+--DROP INDEX jafo.localidad.idx_localidad_codigo_provincia_nombre;
+
+--DROP INDEX jafo.provincia.idx_provincia_codigo_nombre;
+
+--DROP INDEX jafo.bi_dim_ubicacion.idx_ubicacion_localidad_provincia;
+
+--DROP INDEX jafo.pago.idx_pago_medio_pago_fecha_cuotas;
+
+--DROP INDEX jafo.bi_dim_medio_pago.idx_medio_pago_id;
+
+--DROP INDEX jafo.bi_dim_cantidad_cuotas.idx_cantidad_cuotas_cantidad;
+
+--DROP INDEX jafo.bi_dim_tiempo.idx_tiempo_fecha;
 
 -----------------MIGRACIONES--------------------------------------------------------
 --tiempo
@@ -582,34 +627,6 @@ begin try
 end
 go
 
---producto
-IF OBJECT_ID('jafo.migracion_bi_dim_producto', 'P') IS NOT NULL
-    DROP PROCEDURE jafo.migracion_bi_dim_producto;
-GO
-
-create procedure jafo.migracion_bi_dim_producto
-as 
-begin 
-	begin try
-	begin transaction
-		insert into jafo.bi_dim_producto
-			select p.id, p.subrubro_codigo, p.marca_codigo, sr.rubro_codigo
-			from jafo.producto p
-			inner join jafo.subrubro sr
-				on sr.codigo = p.subrubro_codigo
-		commit transaction
-	end try
-	begin catch
-		rollback transaction
-		DECLARE @error nvarchar(max) = CONCAT('Error al migrar producto: ', ERROR_MESSAGE())
-		RAISERROR(@error,16,1)
-	
-	end catch
-
-end
-
-go 
-
 -- hechos publicacion
 IF OBJECT_ID('jafo.migracion_bi_hecho_publicacion', 'P') IS NOT NULL
     DROP PROCEDURE jafo.migracion_bi_hecho_publicacion;
@@ -622,19 +639,25 @@ begin
 	begin transaction
 		
 		insert into jafo.bi_hecho_publicacion
-			select ds.codigo, dm.id_marca, dt.id_tiempo, p.fecha_inicio, DATEDIFF(day, p.fecha_inicio, p.fecha_fin),jafo.obtener_stock_inicial(p.codigo)
+			select 
+				ds.codigo, 
+				dm.id_marca, 
+				dt.id_tiempo, 
+				avg(DATEDIFF(day, p.fecha_inicio, p.fecha_fin)),
+				avg(jafo.obtener_stock_inicial(p.codigo))
 			from jafo.publicacion p
-			inner join bi_dim_producto dp on dp.id_producto = p.producto_id
-			inner join bi_dim_subrubro ds on ds.codigo = dp.sub_rubro_codigo
-			inner join bi_dim_marca dm on dm.id_marca = dp.marca_codigo
-			inner join bi_dim_tiempo dt on dt.id_tiempo = jafo.obtener_id_tiempo(p.fecha_inicio)
+			inner join jafo.producto dp on dp.id = p.producto_id
+			inner join jafo.bi_dim_subrubro ds on ds.codigo = dp.subrubro_codigo
+			inner join jafo.bi_dim_marca dm on dm.id_marca = dp.marca_codigo
+			inner join jafo.bi_dim_tiempo dt on dt.id_tiempo = jafo.obtener_id_tiempo(p.fecha_inicio)
+			group by ds.codigo, dm.id_marca, dt.id_tiempo
 
 		commit transaction
 	end try
 
 	begin catch
 		rollback transaction
-		DECLARE @error nvarchar(max) = CONCAT('Error al migrar Provincia: ', ERROR_MESSAGE())
+		DECLARE @error nvarchar(max) = CONCAT('Error al migrar hechos de publicacion: ', ERROR_MESSAGE())
 		RAISERROR(@error,16,1)
 	end catch
 end
@@ -694,20 +717,6 @@ begin transaction
 commit
 go
 
-IF OBJECT_ID('jafo.migracion_dim_cliente', 'P') IS NOT NULL
-    DROP PROCEDURE jafo.migracion_dim_cliente;
-GO
-
-create procedure jafo.migracion_dim_cliente
-as
-begin transaction
-	insert into jafo.bi_dim_cliente
-	select c.codigo,
-		   DATEDIFF(year, c.fecha_nacimiento, getdate())
-	from cliente c
-commit
-go
-
 IF OBJECT_ID('jafo.migracion_hechos_ventas', 'P') IS NOT NULL
     DROP PROCEDURE jafo.migracion_hechos_ventas;
 GO
@@ -715,27 +724,37 @@ GO
 create procedure jafo.migracion_hechos_ventas
 as
 begin tran
-	insert into jafo.bi_hechos_ventas (idRangoHorario, importe_total, idRangoEtario, idRubro, idTiempo, idUbicacionAlmacen, idUbicacionCliente)
+	insert into jafo.bi_hechos_ventas (idRangoHorario, idRangoEtario, idRubro, idTiempo, idUbicacionAlmacen, idUbicacionCliente, importe_total, cantidad_ventas)
 	select 
-		(select jafo.getRangoHorarioPorFecha(envio.fecha_entrega)),
-		v.total,
-		(select jafo.getAgeRange(c.edad)),
-		prod.idRubro,
-		(select jafo.obtener_id_tiempo(cast(v.fecha as datetime))),
-		(select jafo.getIdUbicacionPorIdDomicilio(publi.almacen_domicilio_codigo)),
-		(select jafo.getIdUbicacionPorIdDomicilio(envio.domicilio_codigo))
+		jafo.getRangoHorarioPorFecha(envio.fecha_entrega) ,
+		jafo.getAgeRange(datediff (year,year(c.fecha_nacimiento), getdate() )),
+		subr.rubro_codigo,
+		 jafo.obtener_id_tiempo(cast(v.fecha as datetime)),
+		 jafo.getIdUbicacionPorIdDomicilio(publi.almacen_domicilio_codigo),
+		 jafo.getIdUbicacionPorIdDomicilio(envio.domicilio_codigo),
+		sum (v.total),
+		count(v.codigo)
 	from jafo.venta v
 	inner join jafo.envio envio
 		on envio.venta_codigo = v.codigo
-	inner join jafo.bi_dim_cliente c
-		on c.idCliente = v.cliente_codigo
+	inner join jafo.cliente c
+		on c.codigo = v.cliente_codigo
 	inner join jafo.detalle_venta dv
 		on dv.venta_codigo = v.codigo
 	inner join jafo.publicacion publi
 		on publi.codigo = dv.publicacion_codigo
-	inner join jafo.bi_dim_producto prod
-		on prod.id_producto = publi.producto_id
-commit 
+	inner join jafo.producto prod
+		on prod.id = publi.producto_id
+	inner join jafo.subrubro subr
+		on subr.codigo = prod.subrubro_codigo
+	group by 
+		(jafo.getRangoHorarioPorFecha(envio.fecha_entrega)),
+		(jafo.getAgeRange(datediff(year, year(fecha_nacimiento), GETDATE()))),
+		subr.rubro_codigo,
+		(jafo.obtener_id_tiempo(cast(v.fecha as datetime))),
+		(jafo.getIdUbicacionPorIdDomicilio(publi.almacen_domicilio_codigo)),
+		(jafo.getIdUbicacionPorIdDomicilio(envio.domicilio_codigo))
+commit
 
 go
 
@@ -767,6 +786,30 @@ end
 
 go
 
+--cantidad cuotas
+create procedure jafo.migracion_dim_cantidad_cuotas
+as
+begin
+	begin try
+		begin tran
+			
+			insert into jafo.bi_dim_cantidad_cuotas
+				select distinct p.cantidad_cuotas
+				from jafo.pago p
+
+
+		commit tran
+	end try
+	begin catch
+		rollback transaction
+		DECLARE @error nvarchar(max) = CONCAT('Error al migrar cantidad de cuotas: ', ERROR_MESSAGE())
+		RAISERROR(@error,16,1)
+	end catch
+
+end
+
+go
+
 --hechos pago
 IF OBJECT_ID('jafo.migracion_hechos_pago', 'P') IS NOT NULL
     DROP PROCEDURE jafo.migracion_hechos_pago;
@@ -783,12 +826,18 @@ begin
 					 jafo.getIdUbicacionPorIdDomicilio(e.domicilio_codigo)
 					,dmp.id_medio_pago
 					,jafo.obtener_id_tiempo(p.fecha)
-					,p.importe
-					,p.cantidad_cuotas
+					,dcc.id_cantidad_cuotas
+					,sum(p.importe)
 				from jafo.pago p
 				inner join jafo.venta v on p.venta_codigo = v.codigo
 				inner join jafo.envio e on e.venta_codigo = v.codigo
 				inner join jafo.bi_dim_medio_pago dmp on p.medio_pago_codigo = dmp.id_medio_pago
+				inner join jafo.bi_dim_cantidad_cuotas dcc on dcc.cantidad = p.cantidad_cuotas
+				group by 
+					 jafo.getIdUbicacionPorIdDomicilio(e.domicilio_codigo)
+					,dmp.id_medio_pago
+					,jafo.obtener_id_tiempo(p.fecha)
+					,dcc.id_cantidad_cuotas
 
 		commit tran
 	end try
@@ -843,16 +892,21 @@ begin
 					,jafo.getIdUbicacionPorIdDomicilio(e.domicilio_codigo)
 					,e.tipo_envio_codigo
 					,jafo.obtener_id_tiempo(e.fecha_entrega)
-					,case 
-						when cast(e.fecha_entrega as date) = cast(fecha_programada as date) and DATEPART(HOUR, e.fecha_entrega) between e.horario_inicio and e.hora_fin_inicio
-							then 1
-							else 0
-					 end
-					,e.costo
+					,sum(case 
+							when cast(e.fecha_entrega as date) = cast(fecha_programada as date) and DATEPART(HOUR, e.fecha_entrega) between e.horario_inicio and e.hora_fin_inicio
+								then 1
+								else 0
+						 end)
+					,count(e.id)
+					,sum(e.costo)
 				from jafo.envio e
 				inner join jafo.detalle_venta dv on dv.venta_codigo = e.venta_codigo
 				inner join jafo.publicacion p on p.codigo = dv.publicacion_codigo
-
+				group by
+					 jafo.getIdUbicacionPorIdDomicilio(p.almacen_domicilio_codigo)
+					,jafo.getIdUbicacionPorIdDomicilio(e.domicilio_codigo)
+					,e.tipo_envio_codigo
+					,jafo.obtener_id_tiempo(e.fecha_entrega)
 		commit tran
 	end try
 	begin catch
@@ -877,62 +931,68 @@ begin tran
 commit tran 
 go
 
--- migracion dim factura
-IF OBJECT_ID('jafo.migracion_dim_factura', 'P') IS NOT NULL
-    DROP PROCEDURE jafo.migracion_dim_factura;
-GO
-
-create procedure jafo.migracion_dim_factura
+-- hechos facturacion 
+create procedure jafo.migracion_hechos_facturacion
 as
 begin tran
-	insert into jafo.bi_dim_factura(idFactura, factura_total)
-	select f.numero, f.total from jafo.factura f
-commit tran
-go
--- migracion hechos detalle factura 
-IF OBJECT_ID('jafo.migracion_hechos_detalle_factura', 'P') IS NOT NULL
-    DROP PROCEDURE jafo.migracion_hechos_detalle_factura;
-GO
-
-create procedure jafo.migracion_hechos_detalle_factura 
-as
-begin tran
-	insert into jafo.bi_hechos_detalle_factura (idConcepto, idFactura, fecha_factura, detalle_total, idUbicacionVendedor, idTiempo)
-	select df.concepto_codigo,
-		   df.factura_numero,
-		   f.fecha,
-		   df.subtotal,
-		   (select jafo.getIdUbicacionPorIdDomicilio(ud.domicilio_codigo)),
-		   (select jafo.obtener_id_tiempo(cast(f.fecha as datetime)))
-	from detalle_factura df
-	inner join jafo.factura f
+	insert into jafo.bi_hechos_facturacion (idConcepto, idUbicacionVendedor, idTiempo, total)
+	select 
+		df.concepto_codigo,
+		(jafo.getIdUbicacionPorIdDomicilio(ud.domicilio_codigo)),
+		(jafo.obtener_id_tiempo(cast(f.fecha as datetime))),
+		sum(df.subtotal)
+	from jafo.detalle_factura df
+	inner join jafo.factura f 
 		on df.factura_numero = f.numero 
 	inner join jafo.usuario_domicilio ud
 		on f.usuario_codigo = ud.usuario_codigo
-		and ud.domicilio_codigo =
-			(select top 1 ud1.domicilio_codigo from jafo.usuario_domicilio ud1 where ud.usuario_codigo = ud1.usuario_codigo)
+		and ud.domicilio_codigo = (select top 1 ud1.domicilio_codigo from jafo.usuario_domicilio ud1 where ud.usuario_codigo = ud1.usuario_codigo)
+	group by
+		df.concepto_codigo,
+		(jafo.getIdUbicacionPorIdDomicilio(ud.domicilio_codigo)),
+		(jafo.obtener_id_tiempo(cast(f.fecha as datetime)))
 commit tran
 go
 
-EXEC jafo.migracion_bi_dim_tiempo
+-------------------EJECUCIONES--------------------------------------------------------
+EXEC JAFO.migracion_bi_dim_tiempo
 EXEC jafo.migracion_bi_dim_subrubro
 exec jafo.migracion_bi_dim_marca
-exec jafo.migracion_dim_ubicacion
 exec jafo.migracion_dim_rubro
-exec jafo.migracion_dim_rango_horario
-exec jafo.migracion_dim_cliente
-exec jafo.migracion_bi_dim_rango_etario 
-exec jafo.migracion_bi_dim_producto
-exec jafo.migracion_dim_medio_pago
-exec jafo.migracion_tipo_envio
-exec jafo.migracion_dim_concepto
-exec jafo.migracion_dim_factura
 exec jafo.migracion_bi_hecho_publicacion
+exec jafo.migracion_dim_ubicacion
+exec jafo.migracion_bi_dim_rango_etario 
+exec jafo.migracion_dim_rango_horario
 exec jafo.migracion_hechos_ventas
+exec jafo.migracion_dim_medio_pago
+exec jafo.migracion_dim_cantidad_cuotas
 exec jafo.migracion_hechos_pago
+exec jafo.migracion_tipo_envio
 exec jafo.migracion_hechos_envio
-exec jafo.migracion_hechos_detalle_factura
+exec jafo.migracion_dim_concepto
+exec jafo.migracion_hechos_facturacion
 go
+
+------ Eliminar procedimientos en el orden correcto
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_tiempo;
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_subrubro;
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_marca;
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_producto;
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_hecho_publicacion;
+--DROP PROCEDURE IF EXISTS jafo.migracion_dim_ubicacion;
+--DROP PROCEDURE IF EXISTS jafo.migracion_dim_rubro; 
+--DROP PROCEDURE IF EXISTS jafo.migracion_bi_dim_rango_etario;
+--DROP PROCEDURE IF EXISTS jafo.migracion_dim_rango_horario;
+--DROP PROCEDURE IF EXISTS jafo.migracion_dim_cliente;
+--DROP PROCEDURE IF EXISTS jafo.migracion_hechos_ventas;
+--drop procedure if exists jafo.migracion_dim_medio_pago
+--drop procedure if exists jafo.migracion_hechos_pago
+--drop procedure if exists jafo.migracion_dim_cantidad_cuotas
+--drop procedure if exists jafo.migracion_dim_concepto
+--drop procedure if exists jafo.migracion_dim_factura
+--drop procedure if exists jafo.migracion_hechos_facturacion
+--drop procedure if exists jafo.migracion_tipo_envio
+--drop procedure if exists jafo.migracion_hechos_envio
 
 -----------------VISTAS--------------------------------------------------------
 --1. Promedio de tiempo de publicaciones por cuatrimestre/año y subrubro
@@ -941,21 +1001,22 @@ IF OBJECT_ID('jafo.view_promedio_tiempo_publicaciones', 'V') IS NOT NULL
 GO
 
 create VIEW jafo.view_promedio_tiempo_publicaciones AS
-SELECT ds.nombre subrubro, dt.Anio , dt.Cuatrimestre, AVG(hp.tiempo_vigente) AS TiempoPromedio
+SELECT ds.nombre subrubro, dt.Anio , dt.Cuatrimestre, AVG(hp.tiempo_vigente_promedio) AS TiempoPromedio
 FROM jafo.bi_hecho_publicacion hp
 JOIN jafo.bi_dim_subrubro ds ON hp.subrubro_id = ds.codigo
 JOIN jafo.bi_dim_tiempo dt ON dt.id_tiempo = hp.tiempo_id
 GROUP BY ds.nombre, dt.Anio, dt.Cuatrimestre;
 
 go
+
 --2. Promedio de Stock Inicial. Cantidad de stock promedio con que se dan de alta
 --las publicaciones según la Marca de los productos publicados por año.
 IF OBJECT_ID('jafo.view_promedio_stock_por_marca', 'V') IS NOT NULL
     DROP VIEW jafo.view_promedio_stock_por_marca;
 GO
 
-create VIEW view_promedio_stock_por_marca AS
-SELECT dm.descripcion, dt.anio, AVG(hp.stock) AS StockPromedio
+create VIEW jafo.view_promedio_stock_por_marca AS
+SELECT dm.descripcion, dt.anio, AVG(hp.stock_inicial_promedio) AS StockPromedio
 FROM jafo.bi_hecho_publicacion hp
 inner JOIN jafo.bi_dim_marca dm ON dm.id_marca = hp.marca_id
 inner JOIN jafo.bi_dim_tiempo dt ON dt.id_tiempo = hp.tiempo_id
@@ -972,7 +1033,7 @@ SELECT
     ub.provincia AS Provincia,
     dt.anio AS Año,
     dt.mes AS Mes,
-    AVG(hv.importe_total) AS VentaPromedioMensual
+    CAST(SUM(hv.importe_total) AS DECIMAL(18, 2)) / SUM(hv.cantidad_ventas)  AS VentaPromedioMensual
 FROM 
     jafo.bi_hechos_ventas hv
 INNER JOIN 
@@ -1026,7 +1087,6 @@ WHERE
     Ranking <= 5;
 GO
 
-
 --5
 IF OBJECT_ID('jafo.view_volumen_ventas_rango_horario', 'V') IS NOT NULL
     DROP VIEW jafo.view_volumen_ventas_rango_horario;
@@ -1037,7 +1097,7 @@ SELECT
     dt.anio AS Año,
     dt.mes AS Mes,
     rh.descripcion_rango AS RangoHorario,
-    COUNT(*) AS CantidadVentas
+    isnull(SUM(hv.cantidad_ventas),0) AS CantidadVentas
 FROM 
     jafo.bi_hechos_ventas hv
 INNER JOIN 
@@ -1080,8 +1140,9 @@ FROM (
         jafo.bi_dim_ubicacion ub ON hp.dim_ubicacion_id = ub.idUbicacion
     INNER JOIN 
         jafo.bi_dim_medio_pago mp ON hp.dim_medio_pago_id = mp.id_medio_pago
-    WHERE 
-        hp.cant_cuotas > 1
+    INNER JOIN
+		jafo.bi_dim_cantidad_cuotas dcc ON hp.dim_cantidad_cuotas_id = dcc.id_cantidad_cuotas 
+		AND dcc.cantidad > 1
     GROUP BY 
         dt.anio, dt.mes, mp.id_medio_pago, mp.nombre, ub.localidad
 ) subquery
@@ -1101,9 +1162,9 @@ SELECT
     du.provincia AS Provincia,
     t.anio AS Año,
     t.mes AS Mes,
-    COUNT(*) AS TotalEnvios,
-    SUM(CASE WHEN he.llegoATiempo = 1 THEN 1 ELSE 0 END) AS EnviosCumplidos,
-    CAST(100.0 * SUM(CASE WHEN he.llegoATiempo = 1 THEN 1 ELSE 0 END) / COUNT(*) AS DECIMAL(5, 2)) AS PorcentajeCumplimiento
+    SUM(he.cantidad_total) AS TotalEnvios,
+    SUM(he.cantidad_a_tiempo) AS EnviosCumplidos,
+	IIF(SUM(he.cantidad_a_tiempo) = 0, 0, CAST(100.0 * SUM(he.cantidad_total) / SUM(he.cantidad_a_tiempo) AS DECIMAL(18, 2))) AS PorcentajeCumplimiento
 FROM 
     jafo.bi_hechos_envios he
 INNER JOIN jafo.bi_dim_ubicacion du 
@@ -1120,14 +1181,14 @@ IF OBJECT_ID('jafo.vw_localidades_mas_pagan', 'V') IS NOT NULL
     DROP VIEW jafo.vw_localidades_mas_pagan;
 GO
 
-create VIEW jafo.vw_localidades_mas_pagan AS
-select top 5 du.localidad, max(he.costo) as costoMaximo
-from jafo.bi_hechos_envios he
+CREATE VIEW jafo.vw_localidades_mas_pagan AS
+SELECT TOP 5 du.localidad, SUM(he.costo) / sum(he.cantidad_total) AS costo_unitario
+FROM jafo.bi_hechos_envios he
 INNER JOIN jafo.bi_dim_ubicacion du 
 	ON he.idUbicacionCliente = du.idUbicacion
-group by du.localidad, he.costo
-order by he.costo desc
-go
+GROUP BY du.localidad, he.costo
+ORDER BY SUM(he.costo) / SUM(he.cantidad_total) DESC
+GO
 
 --9. Porcentaje de facturación por concepto para cada mes de cada año. Se calcula
 --en función del total del concepto sobre el total del período.
@@ -1135,32 +1196,32 @@ IF OBJECT_ID('jafo.porcentaje_facturacion_concepto', 'V') IS NOT NULL
     DROP VIEW jafo.porcentaje_facturacion_concepto;
 GO
 
-
 create view jafo.porcentaje_facturacion_concepto as
 SELECT 
     dc.nombre_concepto as nombreConcepto,
-    sum(hdf.detalle_total) AS TotalFacturadoConcepto,
+    SUM(hf.total) AS TotalFacturadoConcepto,
     CAST(
-        100.0 * sum(hdf.detalle_total) 
+        100.0 * sum(hf.total) 
         / 
         (SELECT 
-         SUM(hdf.detalle_total)
-		 FROM jafo.bi_hechos_detalle_factura hdf
+         SUM(hf.total)
+		 FROM jafo.bi_hechos_facturacion hf
 		 INNER JOIN 
-         jafo.bi_dim_tiempo dt1 ON hdf.idTiempo = dt1.id_tiempo
+         jafo.bi_dim_tiempo dt1 ON hf.idTiempo = dt1.id_tiempo
 		 where dt.anio = dt1.anio and dt.mes = dt1.mes 
 		 GROUP BY dt1.anio, dt1.mes
 		) as decimal(18,2)
     ) AS PorcentajeConcepto,
 	dt.anio,
 	dt.mes
-FROM jafo.bi_hechos_detalle_factura hdf
+FROM jafo.bi_hechos_facturacion hf
 inner join jafo.bi_dim_concepto dc
-    on dc.idConcepto = hdf.idConcepto
+    on dc.idConcepto = hf.idConcepto
 INNER JOIN jafo.bi_dim_tiempo dt 
-    ON hdf.idTiempo = dt.id_tiempo
+    ON hf.idTiempo = dt.id_tiempo
 GROUP BY dc.nombre_concepto, dt.anio, dt.mes
 go
+
 
 --10. Facturación por provincia. Monto facturado según la provincia del vendedor
 --para cada cuatrimestre de cada año.
@@ -1173,15 +1234,14 @@ SELECT
     dt.anio AS Año,
     dt.cuatrimestre AS Cuatrimestre,
     ub.provincia AS Provincia,
-    SUM(hdf.detalle_total) AS TotalFacturado
-FROM 
-    jafo.bi_hechos_detalle_factura hdf
+    SUM(hf.total) AS TotalFacturado
+FROM jafo.bi_hechos_facturacion hf
 INNER JOIN 
-    jafo.bi_dim_tiempo dt ON hdf.idTiempo = dt.id_tiempo
+    jafo.bi_dim_tiempo dt ON hf.idTiempo = dt.id_tiempo
 INNER JOIN 
-    jafo.bi_dim_ubicacion ub ON hdf.idUbicacionVendedor = ub.idUbicacion
+    jafo.bi_dim_ubicacion ub ON hf.idUbicacionVendedor = ub.idUbicacion
 GROUP BY 
-    dt.anio,
+	ub.provincia,
     dt.cuatrimestre,
-    ub.provincia;
+	dt.anio
 GO

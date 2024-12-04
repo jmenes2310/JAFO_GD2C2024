@@ -137,30 +137,6 @@ begin try
 end
 go
 
---producto
-create procedure jafo.migracion_bi_dim_producto
-as 
-begin 
-	begin try
-	begin transaction
-		insert into jafo.bi_dim_producto
-			select p.id, p.subrubro_codigo, p.marca_codigo, sr.rubro_codigo
-			from jafo.producto p
-			inner join jafo.subrubro sr
-				on sr.codigo = p.subrubro_codigo
-		commit transaction
-	end try
-	begin catch
-		rollback transaction
-		DECLARE @error nvarchar(max) = CONCAT('Error al migrar producto: ', ERROR_MESSAGE())
-		RAISERROR(@error,16,1)
-	
-	end catch
-
-end
-
-go 
-
 -- hechos publicacion
 create procedure jafo.migracion_bi_hecho_publicacion
 as 
@@ -228,17 +204,6 @@ as
 begin transaction
 	insert into jafo.bi_dim_rango_horario 
 	values ('00:00-06:00'), ('06:00-12:00'), ('12:00-18:00'), ('18:00-24:00');
-commit
-go
-
--- Borrar
-create procedure jafo.migracion_dim_cliente
-as
-begin transaction
-	insert into jafo.bi_dim_cliente
-	select c.codigo,
-		   DATEDIFF(year, c.fecha_nacimiento, getdate())
-	from cliente c
 commit
 go
 
@@ -364,7 +329,6 @@ begin
 end
 go
 -- migracion tipo envio
-go
 
 create procedure jafo.migracion_tipo_envio
 as
@@ -426,7 +390,6 @@ begin
 end
 go
 
-
 --migracion dim concepto
 create procedure jafo.migracion_dim_concepto 
 as
@@ -448,7 +411,7 @@ begin tran
 		(jafo.obtener_id_tiempo(cast(f.fecha as datetime))),
 		sum(df.subtotal)
 	from jafo.detalle_factura df
-	inner join jafo.factura  
+	inner join jafo.factura f 
 		on df.factura_numero = f.numero 
 	inner join jafo.usuario_domicilio ud
 		on f.usuario_codigo = ud.usuario_codigo
@@ -465,12 +428,10 @@ EXEC JAFO.migracion_bi_dim_tiempo
 EXEC jafo.migracion_bi_dim_subrubro
 exec jafo.migracion_bi_dim_marca
 exec jafo.migracion_dim_rubro
---exec jafo.migracion_bi_dim_producto
 exec jafo.migracion_bi_hecho_publicacion
 exec jafo.migracion_dim_ubicacion
 exec jafo.migracion_bi_dim_rango_etario 
 exec jafo.migracion_dim_rango_horario
---exec jafo.migracion_dim_cliente
 exec jafo.migracion_hechos_ventas
 exec jafo.migracion_dim_medio_pago
 exec jafo.migracion_dim_cantidad_cuotas
